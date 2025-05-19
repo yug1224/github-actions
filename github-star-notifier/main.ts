@@ -1,10 +1,10 @@
 import 'jsr:@std/dotenv/load';
 import AtprotoAPI from 'npm:@atproto/api';
 import createBlueskyProps from './src/createBlueskyProps.ts';
-import createPDF from './src/createPDF.ts';
 import createSummary from './src/createSummary.ts';
 import createXProps from './src/createXProps.ts';
 import getItemList from './src/getItemList.ts';
+import extractReadableContent from './src/extractReadableContent.ts';
 import getOgp from './src/getOgp.ts';
 import postBluesky from './src/postBluesky.ts';
 import postWebhook from './src/postWebhook.ts';
@@ -50,26 +50,26 @@ try {
     // URLからOGPの取得
     const og = await getOgp(link);
 
-    const path = `${timestamp}.pdf`;
+    // Readability.jsで記事本文を抽出
+    const articleText = await extractReadableContent(link);
 
-    // WebページをPDF化
-    await createPDF(link, path);
-
-    // Gemini APIで要約
-    const summary = await createSummary(path);
+    let summary = ''; // summaryを初期化
+    if (articleText && articleText.trim() !== '') {
+      summary = await createSummary(articleText);
+    }
 
     // 投稿記事のプロパティを作成
     const { bskyText } = await createBlueskyProps({
       agent,
       item: {
         ...item,
-        summary,
+        summary, // 抽出された、または空のsummaryを使用
       },
     });
     const { xText } = await createXProps({
       item: {
         ...item,
-        summary,
+        summary, // 抽出された、または空のsummaryを使用
       },
     });
 
