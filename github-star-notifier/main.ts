@@ -10,10 +10,10 @@ import postBluesky from './src/postBluesky.ts';
 import postWebhook from './src/postWebhook.ts';
 import resizeImage from './src/resizeImage.ts';
 
-let cnt = 0, currentItem, itemList;
 try {
+  let cnt = 0;
   // rss feedから記事リストを取得
-  itemList = await getItemList();
+  const itemList = await getItemList();
   console.log(JSON.stringify(itemList, null, 2));
 
   // 対象がなかったら終了
@@ -38,8 +38,6 @@ try {
       console.log('post count over');
       break;
     }
-
-    currentItem = item;
 
     // 最終実行時間を更新
     const timestamp = item.published ? new Date(item.published).getTime() : new Date().getTime();
@@ -101,17 +99,6 @@ try {
   // 終了
   Deno.exit(0);
 } catch (e) {
-  // エラーが発生した記事をリストの最後に追加して保存する
-  if (currentItem && itemList) {
-    await Deno.writeTextFile(
-      '.itemList.json',
-      JSON.stringify([...itemList.slice(cnt), {
-        ...currentItem,
-        published: itemList.at(-1)?.published || currentItem.published,
-      }]),
-    );
-  }
-
   // エラーが発生したらログを出力して終了
   if (e instanceof Error) {
     console.error(e.stack);
