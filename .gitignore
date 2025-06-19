@@ -180,3 +180,4 @@ dist
 .timestamp
 *.pdf
 *.avif
+.env.keys
