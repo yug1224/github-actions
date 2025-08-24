@@ -62,12 +62,14 @@ try {
       item: {
         ...item,
         summary, // 抽出された、または空のsummaryを使用
+        links: [{ href: link }], // 絶対URLを設定
       },
     });
     const { xText } = await createXProps({
       item: {
         ...item,
         summary, // 抽出された、または空のsummaryを使用
+        links: [{ href: link }], // 絶対URLを設定
       },
     });
 
