@@ -43,7 +43,7 @@ try {
     const timestamp = item.published ? new Date(item.published).getTime() : new Date().getTime();
     await Deno.writeTextFile('.timestamp', timestamp.toString());
 
-    const link = item.links[0].href || '';
+    const link = item.links[0].href ? new URL(item.links[0].href, 'https://github.com').href : '';
 
     // URLからOGPの取得
     const og = await getOgp(link);
