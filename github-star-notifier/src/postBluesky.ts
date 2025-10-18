@@ -1,12 +1,9 @@
 import { abortable } from 'jsr:@std/async';
-import AtprotoAPI, { AtpAgent, RichText } from 'npm:@atproto/api';
+import AtprotoAPI from 'npm:@atproto/api';
+import type { PostBlueskyParams, UploadBlobResult } from './types/index.ts';
+import { RETRY_CONFIG } from './config/constants.ts';
+import { retry } from './utils/retry.ts';
 
-interface uploadRetry {
-  $type?: 'blob';
-  ref?: { $link: string };
-  mimeType?: string;
-  size?: number;
-}
 export default async ({
   agent,
   rt,
@@ -15,16 +12,8 @@ export default async ({
   description,
   mimeType,
   image,
-}: {
-  agent: AtpAgent;
-  rt: RichText;
-  title: string;
-  link: string;
-  description: string;
-  mimeType?: string;
-  image?: Uint8Array;
-}) => {
-  const thumb = await (async () => {
+}: PostBlueskyParams): Promise<void> => {
+  const thumb = await (async (): Promise<UploadBlobResult | undefined> => {
     if (!(image instanceof Uint8Array && typeof mimeType === 'string')) return;
     console.log(
       JSON.stringify(
@@ -33,47 +22,51 @@ export default async ({
         2,
       ),
     );
-    const uploadRetry = async (retryCount = 0): Promise<uploadRetry | undefined> => {
-      try {
-        const c = new AbortController();
-        // 10秒でタイムアウト
-        setTimeout(() => {
-          console.log('timeout');
-          return c.abort();
-        }, 1000 * 10 * (retryCount + 1));
 
-        // 画像をアップロード
-        const uploadedImage = await abortable(
-          agent.uploadBlob(image, {
-            encoding: mimeType,
-          }),
-          c.signal,
-        );
-        console.log('Success uploadImage');
+    try {
+      return await retry(
+        async () => {
+          const c = new AbortController();
+          // タイムアウト設定
+          const timeoutId = setTimeout(() => {
+            console.log('Upload timeout');
+            c.abort();
+          }, RETRY_CONFIG.IMAGE_UPLOAD_TIMEOUT_MS);
 
-        // 投稿オブジェクトに画像を追加
-        return {
-          $type: 'blob',
-          ref: {
-            $link: uploadedImage.data.blob.ref.toString(),
+          try {
+            // 画像をアップロード
+            const uploadedImage = await abortable(
+              agent.uploadBlob(image, {
+                encoding: mimeType,
+              }),
+              c.signal,
+            );
+            console.log('Success uploadImage');
+
+            // 投稿オブジェクトに画像を追加
+            return {
+              $type: 'blob' as const,
+              ref: {
+                $link: uploadedImage.data.blob.ref.toString(),
+              },
+              mimeType: uploadedImage.data.blob.mimeType,
+              size: uploadedImage.data.blob.size,
+            };
+          } finally {
+            clearTimeout(timeoutId);
+          }
+        },
+        {
+          maxRetries: RETRY_CONFIG.IMAGE_UPLOAD_MAX_RETRIES,
+          onRetry: (error, attempt) => {
+            console.log(`Retry uploadImage (attempt ${attempt}):`, error);
           },
-          mimeType: uploadedImage.data.blob.mimeType,
-          size: uploadedImage.data.blob.size,
-        };
-      } catch (e) {
-        console.log(JSON.stringify(e, null, 2));
-        // 3回リトライしてもダメならundefinedを返す
-        if (retryCount >= 3) {
-          console.log('Failed uploadImage');
-          return;
-        }
-
-        // リトライ処理
-        console.log(`Retry uploadImage`);
-        return await uploadRetry(retryCount + 1);
-      }
-    };
-    return await uploadRetry();
+        },
+      );
+    } catch (error) {
+      console.log('Failed uploadImage after retries:', error);
+      return undefined;
+    }
   })();
 
   const postObj:

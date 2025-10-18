@@ -21,41 +21,29 @@ jobs:
         uses: denoland/setup-deno@e95548e56dfa95d4e1a28d6f422fafe75c4c26fb # v2.0.3
         with:
           deno-version: v2.x
+      # 必要なディレクトリの作成
+      - name: Create directories
+        run: mkdir -p data temp
       # 最終実行時刻のキャッシュを復元
-      - name: Restore Last Execution Time Cache
-        id: last_execution_time_cache
+      - name: Restore timestamp cache
+        id: restore_cache
         uses: actions/cache/restore@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
         with:
-          path: |
-            github-star-notifier/.timestamp
-          key: GitHubStarNotifier-LastExecutionTime
-          restore-keys: GitHubStarNotifier-LastExecutionTime-
-      # .timestampファイルの存在チェック
-      - name: Check file exists
-        id: check_file
-        uses: andstor/file-existence-action@076e0072799f4942c8bc574a82233e1e4d13e9d6 # v2.0.0
-        with:
-          files: github-star-notifier/.timestamp
-      # 現在時刻を設定
-      - name: Set Current Time
-        if: steps.check_file.outputs.files_exists == 'false'
-        run: |
-          echo "$(deno eval 'console.log(new Date().getTime())')" > .timestamp
+          path: github-star-notifier/data/.timestamp
+          key: github-star-notifier-timestamp
+          restore-keys: github-star-notifier-timestamp-
       # dotenvxのインストール
       - name: Install dotenvx
         run: curl -sfS https://dotenvx.sh/install.sh | sh
       # Denoの実行
-      - name: Deno Run
-        run: |
-          dotenvx run -- deno run -A main.ts
-          ls -la
+      - name: Run notifier
+        run: dotenvx run -- deno run -A main.ts
         env:
-          DOTENV_PRIVATE_KEY: ${{secrets.DOTENV_PRIVATE_KEY_GITHUB_STAR_NOTIFIER}}
+          DOTENV_PRIVATE_KEY: ${{ secrets.DOTENV_PRIVATE_KEY_GITHUB_STAR_NOTIFIER }}
       # 最終実行時刻のキャッシュを保存
-      - name: Save Last Execution Time Cache
+      - name: Save timestamp cache
         uses: actions/cache/save@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
-        if: ${{always()}}
+        if: always()
         with:
-          path: |
-            github-star-notifier/.timestamp
-          key: GitHubStarNotifier-LastExecutionTime-${{github.run_id}}
+          path: github-star-notifier/data/.timestamp
+          key: github-star-notifier-timestamp

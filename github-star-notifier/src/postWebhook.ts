@@ -1,7 +1,6 @@
-export default async (text: string) => {
-  const WEBHOOK_URL = Deno.env.get('WEBHOOK_URL');
-  if (!WEBHOOK_URL) {
-    console.log('WEBHOOK_URL is not defined');
+export default async (text: string, webhookUrl?: string): Promise<void> => {
+  if (!webhookUrl) {
+    console.log('WEBHOOK_URL is not defined, skipping webhook post');
     return;
   }
 
@@ -14,6 +13,6 @@ export default async (text: string) => {
   };
 
   console.log(JSON.stringify(postObj, null, 2));
-  await fetch(WEBHOOK_URL, postObj);
+  await fetch(webhookUrl, postObj);
   console.log('Success postWebhook');
 };
