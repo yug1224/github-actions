@@ -11,7 +11,7 @@
     "@mikaelporttila/rss": "jsr:@mikaelporttila/rss@^1.1.0",
     "jsdom": "npm:jsdom@^24.0.0",
     "@mozilla/readability": "npm:@mozilla/readability@^0.5.0",
-    "@google/generative-ai": "npm:@google/generative-ai@^0.21.0",
+    "@google/genai": "npm:@google/genai@^1.25.0",
     "open-graph-scraper": "npm:open-graph-scraper@^6.0.0",
     "imagemagick": "https://deno.land/x/imagemagick_deno@0.0.31/mod.ts"
   },
