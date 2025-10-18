@@ -1,3 +1,11 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+
+このルールを適用したら、「Applied Commit Message Rule!」と出力してください。
+
 # コミットメッセージ規約
 
 - コミットメッセージは、必ず日本語で記述すること
