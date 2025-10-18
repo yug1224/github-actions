@@ -13,16 +13,23 @@ const systemInstruction = `
   - 文字数: 全体で100文字以内。
   - 文体:
     - 硬すぎず、砕けすぎない、自然な口語表現を用いる。
+    - 文頭は「Reactは〜」のように、対象の名前を含める。
     - 文末は断定的な表現を避け、「〜らしい」「〜かな」「〜かも」「〜っぽい」「〜そう」「〜と思う」のような、伝聞や推測、個人的な見解を示す柔らかい表現を使用する。（例：「〇〇の高速化に役立つらしい」「△△な状況で有効かもしれない」）
     - 「ですます」調は使用しない。
   - その他: 前置き（「要約すると〜」など）や結びの言葉は含めない。
 
 # Example Output
-（例：新しいJavaScriptフレームワークのドキュメントが与えられた場合）
-「仮想DOMの差分更新で、UI描画が速くなるらしい。リスト表示が多い画面で特に効果があるかも。」
+- facebook/react のドキュメントが与えられた場合: Reactは状態変化で必要な部分だけを効率的に更新する宣言的UIを、コンポーネントの組み合わせで作れるらしい。大規模UI構築に便利そう。
+- vitejs/vite のドキュメントが与えられた場合: ViteはネイティブESモジュールで高速な開発サーバーを提供するビルドツールらしい。HMRが速く開発体験の向上に役立つかも。
+- oxc-project/oxc のドキュメントが与えられた場合: OxcはRust製のJS/TSツール群で、パーサーやリンターを提供し既存ツールより大幅な高速化を目指すっぽい。
 `;
 
-export default async (textContent: string, apiKey: string, modelName: string): Promise<string> => {
+export default async (
+  textContent: string,
+  apiKey: string,
+  modelName: string,
+  url?: string,
+): Promise<string> => {
   if (!textContent || textContent.trim() === '') {
     console.warn('Input textContent is empty for summary. Returning empty string.');
     return '';
@@ -45,8 +52,11 @@ export default async (textContent: string, apiKey: string, modelName: string): P
         responseMimeType: GEMINI_CONFIG.RESPONSE_MIME_TYPE,
       };
 
+      // URLのみをプロンプトとして使用
+      const prompt = url || textContent;
+
       const result = await model.generateContent({
-        contents: [{ role: 'user', parts: [{ text: textContent }] }],
+        contents: [{ role: 'user', parts: [{ text: prompt }] }],
         generationConfig,
       });
 

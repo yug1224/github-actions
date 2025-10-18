@@ -50,7 +50,7 @@ async function generateSummary(link: string, apiKey: string, modelName: string):
   if (!articleText || articleText.trim() === '') {
     return '';
   }
-  return await createSummary(articleText, apiKey, modelName);
+  return await createSummary(articleText, apiKey, modelName, link);
 }
 
 /**
