@@ -1,3 +1,11 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+
+このルールを適用したら、「Applied Branch Name Rule!」と出力してください。
+
 # ブランチ名規約
 
 - ブランチ名は、必ず英字小文字で記述すること
