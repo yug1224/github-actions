@@ -1,16 +1,24 @@
-import { parseFeed } from 'jsr:@mikaelporttila/rss';
+import { parseFeed, type FeedEntry } from 'jsr:@mikaelporttila/rss';
+import { MAX_FEED_ITEMS, PATTERNS } from './config/constants.ts';
 
-const lastExecutionTime = await Deno.readTextFile('.timestamp');
-console.log(lastExecutionTime.trim());
-
-export default async () => {
-  const RSS_URL = Deno.env.get('RSS_URL');
-  if (!RSS_URL) {
-    console.log('RSS_URL is not defined');
-    return [];
+const getLastExecutionTime = async (): Promise<string> => {
+  try {
+    const timestamp = await Deno.readTextFile('.timestamp');
+    console.log('Last execution time:', timestamp.trim());
+    return timestamp.trim();
+  } catch (error) {
+    if (error instanceof Deno.errors.NotFound) {
+      console.log('No timestamp file found, using default value (0)');
+      return '0';
+    }
+    throw error;
   }
+};
 
-  const response = await fetch(RSS_URL);
+export default async (rssUrl: string): Promise<FeedEntry[]> => {
+  const lastExecutionTime = await getLastExecutionTime();
+
+  const response = await fetch(rssUrl);
   const xml = await response.text();
   const feed = await parseFeed(xml);
 
@@ -18,10 +26,10 @@ export default async () => {
   const foundList = feed.entries.reverse().filter((item) => {
     return (
       item.published &&
-      new Date(Number(lastExecutionTime.trim())) < new Date(item.published) &&
-      new RegExp('starred', 'g').test(item.title?.value || '')
+      new Date(Number(lastExecutionTime)) < new Date(item.published) &&
+      PATTERNS.STARRED_FILTER.test(item.title?.value || '')
     );
   });
-  // foundListの20件目までを返す
-  return foundList.slice(0, 20);
+  // foundListの上限件数までを返す
+  return foundList.slice(0, MAX_FEED_ITEMS);
 };

@@ -1,4 +1,6 @@
 import { GoogleGenerativeAI } from 'npm:@google/generative-ai';
+import { GEMINI_CONFIG, RETRY_CONFIG } from './config/constants.ts';
+import { retry } from './utils/retry.ts';
 
 const systemInstruction = `
 # Role
@@ -20,28 +22,27 @@ const systemInstruction = `
 「仮想DOMの差分更新で、UI描画が速くなるらしい。リスト表示が多い画面で特に効果があるかも。」
 `;
 
-const apiKey = Deno.env.get('GOOGLE_AI_API_KEY') || '';
-const genAI = new GoogleGenerativeAI(apiKey);
+export default async (textContent: string, apiKey: string, modelName: string): Promise<string> => {
+  if (!textContent || textContent.trim() === '') {
+    console.warn('Input textContent is empty for summary. Returning empty string.');
+    return '';
+  }
 
-export default async (textContent: string): Promise<string> => {
-  const retry = async (retryCount = 0) => {
-    try {
-      if (!textContent || textContent.trim() === '') {
-        console.warn('Input textContent is empty for summary. Returning empty string.');
-        return '';
-      }
+  const genAI = new GoogleGenerativeAI(apiKey);
 
+  return await retry(
+    async () => {
       const model = genAI.getGenerativeModel({
-        model: Deno.env.get('GEMINI_MODEL') || 'gemini-2.0-flash-lite',
+        model: modelName,
         systemInstruction,
       });
 
       const generationConfig = {
-        temperature: 1,
-        topP: 0.95,
-        topK: 64,
-        maxOutputTokens: 8192,
-        responseMimeType: 'text/plain',
+        temperature: GEMINI_CONFIG.TEMPERATURE,
+        topP: GEMINI_CONFIG.TOP_P,
+        topK: GEMINI_CONFIG.TOP_K,
+        maxOutputTokens: GEMINI_CONFIG.MAX_OUTPUT_TOKENS,
+        responseMimeType: GEMINI_CONFIG.RESPONSE_MIME_TYPE,
       };
 
       const result = await model.generateContent({
@@ -53,17 +54,12 @@ export default async (textContent: string): Promise<string> => {
       console.log('Success createSummary');
       console.log(responseText);
       return responseText;
-    } catch (e) {
-      console.error(e);
-
-      if (retryCount >= 5) {
-        throw new Error('Failed createSummary');
-      }
-
-      // リトライ処理
-      console.log(`Retry createSummary`);
-      return await retry(retryCount + 1);
-    }
-  };
-  return await retry();
+    },
+    {
+      maxRetries: RETRY_CONFIG.SUMMARY_MAX_RETRIES,
+      onRetry: (error, attempt) => {
+        console.log(`Retry createSummary (attempt ${attempt}):`, error);
+      },
+    },
+  );
 };

@@ -1,12 +1,8 @@
-import { type FeedEntry } from 'jsr:@mikaelporttila/rss';
-
-import AtprotoAPI, { AtpAgent } from 'npm:@atproto/api';
+import AtprotoAPI from 'npm:@atproto/api';
+import type { BlueskyProps, CreateBlueskyPropsParams } from './types/index.ts';
 const { RichText } = AtprotoAPI;
 
-export default async ({ agent, item }: {
-  agent: AtpAgent;
-  item: FeedEntry & { summary: string };
-}) => {
+export default async ({ agent, item }: CreateBlueskyPropsParams): Promise<BlueskyProps> => {
   const title: string = (item.title?.value || '').trim();
   const link = item.links[0].href || '';
   const summary = item.summary;

@@ -1,8 +1,10 @@
 import ogs from 'npm:open-graph-scraper';
+import type { OgpResult } from './types/index.ts';
+import { USER_AGENT } from './config/constants.ts';
 
-export default async (url: string) => {
+export default async (url: string): Promise<OgpResult> => {
   const response = await fetch(url, {
-    headers: { 'user-agent': 'Twitterbot' },
+    headers: { 'user-agent': USER_AGENT.OGP_FETCH },
   });
 
   // OGP取得のリクエストに失敗した場合は空オブジェクトを返す
@@ -15,5 +17,5 @@ export default async (url: string) => {
   const { result } = await ogs({ html });
   console.log(JSON.stringify(result, null, 2));
   console.log('Success getOgp');
-  return result;
+  return result as OgpResult;
 };

@@ -1,7 +1,6 @@
-import { type FeedEntry } from 'jsr:@mikaelporttila/rss';
+import type { CreateXPropsParams, XProps } from './types/index.ts';
 
-// deno-lint-ignore require-await
-export default async ({ item }: { item: FeedEntry & { summary: string } }) => {
+export default ({ item }: CreateXPropsParams): XProps => {
   const title: string = (item.title?.value || '').trim();
   const link: string = item.links[0].href || '';
   const summary = item.summary;
