@@ -1,2 +1,5 @@
 !.env
 .env.keys
+data/
+temp/
+*.avif

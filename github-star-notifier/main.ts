@@ -30,7 +30,7 @@ async function initializeBlueskyAgent(identifier: string, password: string): Pro
  * タイムスタンプファイルを更新
  */
 async function updateTimestamp(timestamp: number): Promise<void> {
-  await Deno.writeTextFile('.timestamp', timestamp.toString());
+  await Deno.writeTextFile('data/.timestamp', timestamp.toString());
 }
 
 /**

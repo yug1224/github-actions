@@ -1,6 +1,19 @@
+/**
+ * Webページから読みやすいテキストコンテンツを抽出するモジュール
+ */
+
 import { JSDOM } from 'npm:jsdom';
 import { Readability } from 'npm:@mozilla/readability';
 
+/**
+ * 指定されたURLから記事の本文を抽出する
+ *
+ * Mozilla Readabilityを使用してWebページから
+ * 読みやすいテキストコンテンツを抽出します。
+ *
+ * @param url - コンテンツを抽出するURL
+ * @returns 抽出されたテキストコンテンツ。失敗した場合は空文字列
+ */
 export default async (url: string): Promise<string> => {
   try {
     const response = await fetch(url);

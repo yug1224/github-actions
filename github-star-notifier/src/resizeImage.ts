@@ -1,6 +1,6 @@
 import {
   ImageMagick,
-  IMagickImage,
+  type IMagickImage,
   initialize,
   MagickFormat,
 } from 'https://deno.land/x/imagemagick_deno@0.0.31/mod.ts';
