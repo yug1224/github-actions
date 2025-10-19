@@ -1,0 +1,218 @@
+---
+rss-feed-notifier/domain-rules: RSS Feed Notifier のドメインルール
+---
+
+このルールを適用したら、「Applied RSS Feed Notifier Domain Rules!」と出力してください。
+
+# プロジェクト概要
+
+RSS Feed Notifier は、RSSフィードを監視し、新着記事をBlueskyとWebhook（X連携）に自動投稿するアプリケーションです。
+
+# ユビキタス言語（プロジェクト固有）
+
+## コアドメイン用語
+
+### エンティティ
+- **FeedItem**: RSSフィードから取得した記事アイテム
+  - プロパティ: id, title, url, publishedAt, description
+  - ビジネスルール: 前回取得時刻以降の記事のみ処理対象
+
+- **Post**: SNSへの投稿内容
+  - プロパティ: text, image, url
+  - ビジネスルール: 文字数制限（Bluesky: 300文字、X: 280文字）
+
+### Value Object
+- **Url**: URL文字列（バリデーション付き）
+  - 不変
+  - 自己検証（無効なURLは生成時にエラー）
+
+- **PostText**: 投稿テキスト（文字数制限付き）
+  - プロパティ: text, platform (bluesky/x)
+  - 不変
+  - プラットフォームに応じた文字数制限を検証
+
+- **OpenGraphData**: Webページのメタデータ
+  - プロパティ: title, description, imageUrl
+  - 不変
+
+- **Timestamp**: タイムスタンプ（エポックミリ秒）
+  - 不変
+  - 日付との相互変換機能
+
+### サービス
+- **Notification**: 通知全般
+  - 種類: Webhook通知、Bluesky投稿
+
+## 境界づけられたコンテキスト
+
+このプロジェクトは1つのBounded Contextで構成：
+- **Feed Monitoring & Notification Context**: フィード監視と通知
+
+# レイヤー構造（プロジェクト固有）
+
+```
+rss-feed-notifier/
+├── src/
+│   ├── domain/                      # ドメイン層
+│   │   ├── models/
+│   │   │   ├── FeedItem.ts         # エンティティ
+│   │   │   ├── Url.ts              # Value Object
+│   │   │   ├── PostText.ts         # Value Object
+│   │   │   ├── OpenGraphData.ts    # Value Object
+│   │   │   ├── Timestamp.ts        # Value Object
+│   │   │   └── index.ts
+│   │   └── repositories/
+│   │       ├── IFeedRepository.ts
+│   │       ├── INotificationRepository.ts
+│   │       ├── IOpenGraphRepository.ts
+│   │       ├── IImageRepository.ts
+│   │       ├── IStorageRepository.ts
+│   │       └── index.ts
+│   │
+│   ├── application/                 # アプリケーション層
+│   │   ├── usecases/
+│   │   │   ├── FetchAndNotifyUseCase.ts
+│   │   │   └── index.ts
+│   │   └── formatters/
+│   │       ├── BlueskyPostFormatter.ts
+│   │       └── WebhookMessageFormatter.ts
+│   │
+│   ├── infrastructure/              # インフラストラクチャ層
+│   │   ├── repositories/
+│   │   │   ├── FeedRepository.ts
+│   │   │   ├── NotificationRepository.ts
+│   │   │   ├── OpenGraphRepository.ts
+│   │   │   ├── ImageRepository.ts
+│   │   │   ├── StorageRepository.ts
+│   │   │   └── index.ts
+│   │   └── external/
+│   │       ├── RssFeedClient.ts
+│   │       ├── BlueskyClient.ts
+│   │       ├── WebhookClient.ts
+│   │       ├── OgpFetcher.ts
+│   │       └── ImageProcessor.ts
+│   │
+│   ├── config/
+│   │   ├── env.ts
+│   │   └── constants.ts
+│   │
+│   └── utils/
+│       ├── errors.ts
+│       ├── logger.ts
+│       └── retry.ts
+│
+├── tests/                           # テスト（src と同じ構造）
+│   ├── domain/
+│   ├── application/
+│   └── infrastructure/
+│
+├── data/                            # 実行時データ
+│   ├── .timestamp
+│   └── .itemList.json
+│
+├── main.ts                          # エントリーポイント
+├── deno.jsonc
+└── deno.lock
+```
+
+# ビジネスルール
+
+## フィード取得
+- RSS URL: 環境変数 `RSS_URL` で指定
+- 取得頻度: 定期実行（GitHub Actions）
+- フィルタリング: 最終取得時刻以降の新着記事のみ
+- 記事の保存: `.itemList.json` に未投稿記事リストを保存
+
+## 投稿時間制約
+- 投稿可能時間: UTC 1:00 〜 15:00（日本時間 10:00 〜 24:00）
+- 1回の実行で最大3件まで投稿
+
+## OGP取得
+- PDF URLの場合: ファイル名をタイトルとして使用、または中身からタイトル抽出
+- HTML URLの場合: Open Graph Protocolメタデータを取得
+- 文字コード: UTF-8以外も対応（自動判定・デコード）
+- プライベートIPアドレス: スキップ（10.x.x.x, 172.16.x.x, 192.168.x.x）
+
+## 画像処理
+- 最大サイズ: 2000x2000px
+- フォーマット: AVIF
+- 最大ファイルサイズ: 976.56KB
+- リトライ: サイズオーバーの場合はクオリティを下げて再処理
+
+## Bluesky投稿
+- 文字数制限: 300文字
+- テキストフォーマット:
+  - リンク表示: `{host}{pathname}` （30文字超の場合は26文字 + "..."）
+  - タイトル付き: `{displayLink}\n{title}` （タイトルは100文字まで）
+- 画像: OGP画像を添付
+- リッチテキスト: URLにリンクファセットを設定
+- 言語: 日本語 (ja)
+
+## Webhook通知（X連携）
+- テキストフォーマット:
+  - タイトルなし: `{link}`
+  - タイトル付き: `{title}\n{link}` （タイトルは100文字まで）
+- ペイロード: `{ value1: text }`
+
+# エラーハンドリング
+
+## リトライ対象
+- RSSフィード取得失敗
+- OGP取得失敗（リトライなし、空オブジェクト返却）
+- 画像取得失敗（最大5回リトライ）
+- 画像リサイズ失敗（クオリティ調整で自動リトライ）
+- Bluesky画像アップロード失敗（最大5回リトライ）
+
+## エラー時の挙動
+- 処理中のエラー: 現在のアイテムを `.itemList.json` に戻して次回リトライ
+- タイムアウト: 10分でメイン処理を強制終了
+
+## エラーログ
+- すべてのエラーをログに記録
+- APIキーは含めない
+- スタックトレースを出力
+
+# パフォーマンス要件
+
+- フィード取得: 即座
+- OGP取得: 10秒以内（タイムアウトなし、失敗時は空返却）
+- 画像処理: 30秒以内
+- Bluesky投稿: 10秒以内（画像アップロードは動的タイムアウト）
+- 全体処理: 10分以内（タイムアウト設定あり）
+
+# セキュリティ
+
+## 環境変数
+必須の環境変数：
+- `RSS_URL`: 監視するRSSフィードのURL
+- `BLUESKY_IDENTIFIER`: Blueskyアカウント
+- `BLUESKY_PASSWORD`: Blueskyパスワード
+- `WEBHOOK_URL`: 通知先WebhookURL
+
+## 機密情報の取り扱い
+- 環境変数は `config/env.ts` 経由でアクセス
+- ログにパスワードを出力しない
+- 一時画像ファイルは処理後も保持（デバッグ用）
+
+# テスト戦略
+
+## 単体テスト
+- ドメインモデルのビジネスロジック
+- Value Objectのバリデーション
+
+## 統合テスト
+- ユースケースのシナリオ
+- リポジトリの実装
+- 外部APIクライアント（モックサーバー使用）
+
+## カバレッジ目標
+- ドメイン層: 80%以上
+- アプリケーション層: 70%以上
+- インフラ層: 50%以上
+
+# 関連ルール
+
+プロジェクト開発時は以下のルールも参照：
+- **開発基本ルール**: `@development-basic-rule.mdc` （ワークスペースルート）
+- **Git ブランチ命名**: `@branch-name-rule.mdc`
+- **Git コミットメッセージ**: `@commit-message-rule.mdc`
