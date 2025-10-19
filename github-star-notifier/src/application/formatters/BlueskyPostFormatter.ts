@@ -1,14 +1,15 @@
 import AtprotoAPI from 'npm:@atproto/api';
-import type { BlueskyProps, CreateBlueskyPropsParams } from './types/index.ts';
+import type { BlueskyFormatterParams, BlueskyPostContent } from '../../types/index.ts';
+import { logger } from '../../utils/logger.ts';
 const { RichText } = AtprotoAPI;
 
-export default async ({ agent, item }: CreateBlueskyPropsParams): Promise<BlueskyProps> => {
+export default async ({ agent, item }: BlueskyFormatterParams): Promise<BlueskyPostContent> => {
   const title: string = (item.title?.value || '').trim();
   const link = item.links[0].href || '';
   const summary = item.summary;
 
   // Bluesky用のテキストを作成
-  const bskyText = await (async () => {
+  const richText = await (async () => {
     let text = `${title}\n${link}`;
 
     if (summary) {
@@ -20,6 +21,6 @@ export default async ({ agent, item }: CreateBlueskyPropsParams): Promise<Bluesk
     return rt;
   })();
 
-  console.log('Success createBlueskyProps');
-  return { bskyText };
+  logger.debug('Formatted Bluesky post', { title, link });
+  return { richText };
 };

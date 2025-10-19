@@ -4,8 +4,6 @@
  * アプリケーション全体で一貫したログ出力を提供します。
  */
 
-import * as log from '@std/log';
-
 // ログレベルの型定義
 export type LogLevel = 'DEBUG' | 'INFO' | 'WARN' | 'ERROR';
 

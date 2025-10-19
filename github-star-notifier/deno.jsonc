@@ -15,6 +15,12 @@
     "open-graph-scraper": "npm:open-graph-scraper@^6.0.0",
     "imagemagick": "https://deno.land/x/imagemagick_deno@0.0.31/mod.ts"
   },
+  "tasks": {
+    "test": "deno test --allow-env --allow-net --allow-read --allow-write",
+    "test:watch": "deno test --watch --allow-env --allow-net --allow-read --allow-write",
+    "test:coverage": "deno test --coverage=coverage --allow-env --allow-net --allow-read --allow-write && deno coverage coverage",
+    "test:coverage:html": "deno test --coverage=coverage --allow-env --allow-net --allow-read --allow-write && deno coverage coverage --html"
+  },
   "fmt": {
     "include": ["./"],
     "indentWidth": 2,

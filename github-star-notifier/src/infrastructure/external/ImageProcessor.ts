@@ -4,11 +4,12 @@ import {
   initialize,
   MagickFormat,
 } from 'https://deno.land/x/imagemagick_deno@0.0.31/mod.ts';
-import type { ResizedImageResult } from './types/index.ts';
-import { IMAGE_CONFIG, RETRY_CONFIG } from './config/constants.ts';
-import { retry } from './utils/retry.ts';
+import type { ProcessedImageResult } from '../../types/index.ts';
+import { IMAGE_CONFIG, RETRY_CONFIG } from '../../config/constants.ts';
+import { retry } from '../../utils/retry.ts';
+import { logger } from '../../utils/logger.ts';
 
-export default async (url: string, timestamp: number): Promise<ResizedImageResult> => {
+export default async (url: string, timestamp: number): Promise<ProcessedImageResult> => {
   try {
     // 画像取得処理をリトライ機能付きで実行
     const response = await retry(
@@ -25,7 +26,7 @@ export default async (url: string, timestamp: number): Promise<ResizedImageResul
       {
         maxRetries: RETRY_CONFIG.IMAGE_FETCH_MAX_RETRIES,
         onRetry: (error, attempt) => {
-          console.log(`Retry getImage (attempt ${attempt}):`, error);
+          logger.warn('Retrying image fetch', { attempt, error: String(error), url });
         },
       },
     );
@@ -38,7 +39,7 @@ export default async (url: string, timestamp: number): Promise<ResizedImageResul
     }: {
       buffer: ArrayBuffer;
       retryCount?: number;
-    }): Promise<ResizedImageResult> => {
+    }): Promise<ProcessedImageResult> => {
       await initialize();
 
       const mimeType = IMAGE_CONFIG.MIME_TYPE;
@@ -57,10 +58,15 @@ export default async (url: string, timestamp: number): Promise<ResizedImageResul
           return resized;
         });
 
-        console.log('resizedImage.byteLength', resizedImage.byteLength);
+        logger.debug('Resized image', {
+          byteLength: resizedImage.byteLength,
+          quality: 100 - (retryCount * 2),
+        });
         if (resizedImage && resizedImage.byteLength > IMAGE_CONFIG.MAX_BYTE_LENGTH) {
           // リトライ処理
-          console.log('Retry resizedImage');
+          logger.debug('Image too large, retrying with lower quality', {
+            retryCount: retryCount + 1,
+          });
           return await resizeRetry({ buffer, retryCount: retryCount + 1 });
         }
         return { mimeType, resizedImage };
@@ -75,16 +81,13 @@ export default async (url: string, timestamp: number): Promise<ResizedImageResul
     };
     const { mimeType, resizedImage } = await resizeRetry({ buffer });
 
-    console.log('Success resizeImage');
+    logger.info('Successfully resized image', { url });
     return {
       mimeType,
       resizedImage,
     };
   } catch (e) {
-    console.error(e);
-
-    // 画像のリサイズに失敗した場合は空オブジェクトを返す
-    console.log('Failed resizeImage');
+    logger.error('Failed to resize image', e, { url });
     return {};
   }
 };

@@ -1,0 +1,242 @@
+---
+description: GitHub Star Notifier のドメインルール
+globs:
+  - "github-star-notifier/**"
+alwaysApply: false
+---
+
+このルールを適用したら、「Applied GitHub Star Notifier Domain Rules!」と出力してください。
+
+# プロジェクト概要
+
+GitHub Star Notifier は、GitHubでスターされたリポジトリを監視し、新着情報をSNSに通知するアプリケーションです。
+
+# ユビキタス言語（プロジェクト固有）
+
+## コアドメイン用語
+
+### エンティティ
+- **FeedItem**: RSSフィードから取得した記事アイテム
+  - プロパティ: id, title, url, publishedAt, content
+  - ビジネスルール: 24時間以内の記事のみ処理対象
+
+- **Star**: GitHubリポジトリのスター情報
+  - プロパティ: repositoryUrl, starredAt, repository
+  - ビジネスルール: 新規スターのみ通知
+
+- **Post**: SNSへの投稿内容
+  - プロパティ: text, image, url
+  - ビジネスルール: 文字数制限（Bluesky: 300文字）
+
+### Value Object
+- **Url**: URL文字列（バリデーション付き）
+  - 不変
+  - 自己検証（無効なURLは生成時にエラー）
+
+- **Summary**: AI生成の記事要約
+  - プロパティ: text, generatedAt
+  - 不変
+  - 最大300文字
+
+- **OpenGraphData**: Webページのメタデータ
+  - プロパティ: title, description, image, url
+  - 不変
+
+### サービス
+- **Notification**: 通知全般
+  - 種類: Webhook通知、Bluesky投稿
+
+## 境界づけられたコンテキスト
+
+このプロジェクトは1つのBounded Contextで構成：
+- **Feed Monitoring & Notification Context**: フィード監視と通知
+
+# レイヤー構造（プロジェクト固有）
+
+```
+github-star-notifier/
+├── src/
+│   ├── domain/                      # ドメイン層
+│   │   ├── models/
+│   │   │   ├── FeedItem.ts         # エンティティ
+│   │   │   ├── Star.ts             # エンティティ
+│   │   │   ├── Post.ts             # エンティティ
+│   │   │   ├── Url.ts              # Value Object
+│   │   │   ├── Summary.ts          # Value Object
+│   │   │   └── OpenGraphData.ts    # Value Object
+│   │   ├── repositories/
+│   │   │   ├── IFeedRepository.ts
+│   │   │   ├── IStarRepository.ts
+│   │   │   └── IPostRepository.ts
+│   │   └── services/
+│   │       ├── PostFormattingService.ts
+│   │       └── DuplicationCheckService.ts
+│   │
+│   ├── application/                 # アプリケーション層
+│   │   ├── usecases/
+│   │   │   ├── FetchAndNotifyUseCase.ts
+│   │   │   └── PublishToBlueskyUseCase.ts
+│   │   └── dto/
+│   │       ├── FeedItemDto.ts
+│   │       └── NotificationDto.ts
+│   │
+│   ├── infrastructure/              # インフラストラクチャ層
+│   │   ├── repositories/
+│   │   │   ├── RssFeedRepository.ts
+│   │   │   ├── FileStarRepository.ts
+│   │   │   └── BlueskyPostRepository.ts
+│   │   ├── external/
+│   │   │   ├── api/
+│   │   │   │   ├── BlueskyApiClient.ts
+│   │   │   │   ├── OpenAIClient.ts
+│   │   │   │   └── WebhookClient.ts
+│   │   │   └── parsers/
+│   │   │       ├── RssFeedParser.ts
+│   │   │       └── OgpParser.ts
+│   │   └── storage/
+│   │       ├── FileStorage.ts
+│   │       └── TimestampStore.ts
+│   │
+│   ├── config/
+│   │   ├── env.ts
+│   │   └── constants.ts
+│   │
+│   ├── utils/
+│   │   ├── errors.ts
+│   │   ├── logger.ts
+│   │   ├── retry.ts
+│   │   └── url.ts
+│   │
+│   └── types/                       # 移行期の型定義（将来的にdomain/modelsへ）
+│       └── index.ts
+│
+├── tests/                           # テスト（src と同じ構造）
+│   ├── domain/
+│   ├── application/
+│   └── infrastructure/
+│
+├── data/                            # 実行時データ
+│   └── .timestamp
+│
+├── main.ts                          # エントリーポイント
+├── deno.jsonc
+└── deno.lock
+```
+
+# ビジネスルール
+
+## フィード取得
+- GitHub Star フィードURL: `https://github.com/{username}.atom`
+- 取得頻度: 定期実行（GitHub Actions）
+- フィルタリング: 最終取得時刻以降の新着記事のみ
+
+## 要約生成
+- AI: OpenAI GPT-4o-mini
+- 最大トークン数: 300
+- 言語: 日本語
+- フォーマット: 簡潔な説明文
+
+## Bluesky投稿
+- 文字数制限: 300文字
+- 画像: OGP画像を添付（リサイズ: 800x418px）
+- フォーマット:
+  ```
+  {要約文}
+
+  {記事タイトル}
+  {記事URL}
+  ```
+
+## Webhook通知
+- フォーマット: Markdown
+- 含まれる情報: タイトル、URL、要約、OGP画像
+
+# エラーハンドリング
+
+## リトライ対象
+- RSSフィード取得失敗
+- OGP取得失敗
+- AI要約生成失敗
+- Bluesky投稿失敗
+- Webhook送信失敗
+
+## リトライ設定
+- 最大試行回数: 3回
+- バックオフ: 指数バックオフ（1秒、2秒、4秒）
+
+## エラーログ
+- すべてのエラーをログに記録
+- APIキーは含めない
+- エラーの原因と文脈を明記
+
+# パフォーマンス要件
+
+- フィード取得: 10秒以内
+- 要約生成: 30秒以内
+- Bluesky投稿: 10秒以内
+- 全体処理: 1分以内
+
+# セキュリティ
+
+## 環境変数
+必須の環境変数：
+- `GITHUB_USERNAME`: GitHubユーザー名
+- `BLUESKY_IDENTIFIER`: Blueskyアカウント
+- `BLUESKY_PASSWORD`: Blueskyパスワード
+- `OPENAI_API_KEY`: OpenAI APIキー
+- `WEBHOOK_URL`: 通知先WebhookURL
+
+## 機密情報の取り扱い
+- 環境変数は `config/env.ts` 経由でアクセス
+- ログにAPIキーやパスワードを出力しない
+- 一時ファイルは処理後に削除
+
+# テスト戦略
+
+## 単体テスト
+- ドメインモデルのビジネスロジック
+- Value Objectのバリデーション
+- ドメインサービスのロジック
+
+## 統合テスト
+- ユースケースのシナリオ
+- リポジトリの実装
+- 外部APIクライアント（モックサーバー使用）
+
+## カバレッジ目標
+- ドメイン層: 80%以上
+- アプリケーション層: 70%以上
+- インフラ層: 50%以上
+
+# 移行計画
+
+## Phase 1: Value Object導入（現在）
+- [x] エラークラスの整理
+- [ ] `Url` Value Objectの作成
+- [ ] `Summary` Value Objectの作成
+- [ ] 既存コードでの使用
+
+## Phase 2: レイヤー構造の整理
+- [ ] `domain/`, `application/`, `infrastructure/` ディレクトリ作成
+- [ ] 既存ファイルの移動
+- [ ] import パスの修正
+
+## Phase 3: Repository パターン
+- [ ] リポジトリインターフェースの定義
+- [ ] 実装の作成
+- [ ] main.ts でのDI
+
+## Phase 4: Use Case の抽出
+- [ ] ユースケースクラスの作成
+- [ ] main.ts のリファクタリング
+
+## Phase 5: テストの充実
+- [ ] ドメイン層のテスト追加
+- [ ] モックを使った統合テスト
+
+# 関連ルール
+
+プロジェクト開発時は以下のルールも参照：
+- **開発基本ルール**: `@development-basic-rule.mdc` （ワークスペースルート）
+- **Git ブランチ命名**: `@branch-name-rule.mdc`
+- **Git コミットメッセージ**: `@commit-message-rule.mdc`

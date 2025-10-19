@@ -1,5 +1,5 @@
 ---
-description: 開発の基本ルール
+description: 開発の基本ルール（DDD準拠）
 globs:
 alwaysApply: true
 ---
@@ -11,3 +11,347 @@ alwaysApply: true
 - **必ず日本語で解答してください**
 - コードコメントやドキュメントも日本語で記述してください
 - コミットメッセージは日本語で記述してください
+- **ドメイン駆動設計（DDD）のプラクティスに従う**
+- **ユビキタス言語を徹底する**
+
+# DDD設計原則
+
+## ユビキタス言語（Ubiquitous Language）
+プロジェクト全体で統一された用語を使用し、ドメイン専門家とのコミュニケーションを円滑に：
+
+- ビジネス用語とコード上の用語を一致させる
+- ドメインモデル、変数名、関数名、コメントで同じ用語を使用
+- 曖昧な用語（data, info, manager等）を避け、具体的な名前を使用
+- **プロジェクト固有の用語は、各プロジェクトの `.cursor/rules` に定義**
+
+## レイヤーアーキテクチャ
+
+DDDでは、関心事を以下の層に分離します：
+
+```
+src/
+├── domain/                    # ドメイン層（ビジネスロジック）
+│   ├── models/               # ドメインモデル
+│   │   ├── *.ts             # エンティティ（一意の識別子を持つ）
+│   │   └── *.ts             # Value Object（値による等価性）
+│   ├── repositories/         # リポジトリインターフェース
+│   │   └── I*Repository.ts  # データ永続化の抽象化
+│   └── services/             # ドメインサービス
+│       └── *Service.ts      # 複数のエンティティにまたがるロジック
+│
+├── application/               # アプリケーション層（ユースケース）
+│   ├── usecases/
+│   │   └── *UseCase.ts      # ビジネスユースケースのオーケストレーション
+│   └── dto/                  # Data Transfer Object
+│       └── *Dto.ts          # 層間のデータ受け渡し
+│
+├── infrastructure/            # インフラストラクチャ層（技術的詳細）
+│   ├── repositories/         # リポジトリ実装
+│   │   └── *Repository.ts   # 実際の永続化処理
+│   ├── external/             # 外部サービス
+│   │   ├── *ApiClient.ts    # 外部API呼び出し
+│   │   └── *Client.ts       # その他の外部システム
+│   └── storage/              # 永続化
+│       └── *Storage.ts      # ファイル、DB等の具体的な実装
+│
+├── config/                    # 設定
+│   ├── env.ts               # 環境変数の管理
+│   └── constants.ts         # アプリケーション定数
+│
+└── utils/                     # 汎用ユーティリティ
+    ├── logger.ts            # ロギング
+    ├── retry.ts             # リトライ処理
+    └── errors.ts            # エラークラス
+```
+
+**重要**: 具体的なファイル構成は、各プロジェクトの `.cursor/rules` で定義してください。
+
+## 戦術的DDDパターン
+
+### 1. Value Object（値オブジェクト）
+不変で、値による等価性を持つオブジェクト：
+
+```typescript
+// domain/models/Url.ts
+export class Url {
+  private constructor(private readonly value: string) {
+    if (!this.isValid(value)) {
+      throw new Error(`無効なURL: ${value}`);
+    }
+  }
+
+  static create(value: string): Url {
+    return new Url(value);
+  }
+
+  private isValid(value: string): boolean {
+    try {
+      new URL(value);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  toString(): string {
+    return this.value;
+  }
+}
+```
+
+### 2. Entity（エンティティ）
+一意の識別子を持つオブジェクト：
+
+```typescript
+// domain/models/FeedItem.ts
+export class FeedItem {
+  constructor(
+    private readonly id: string,
+    private readonly title: string,
+    private readonly url: Url,
+    private readonly publishedAt: Date,
+  ) {}
+
+  // ビジネスロジック
+  isRecent(thresholdHours: number = 24): boolean {
+    const threshold = Date.now() - thresholdHours * 60 * 60 * 1000;
+    return this.publishedAt.getTime() > threshold;
+  }
+}
+```
+
+### 3. Repository（リポジトリ）
+ドメインオブジェクトの永続化を抽象化：
+
+```typescript
+// domain/repositories/IFeedRepository.ts
+export interface IFeedRepository {
+  fetchLatestItems(feedUrl: Url): Promise<FeedItem[]>;
+  getLastFetchedTimestamp(): Promise<Date | null>;
+  saveLastFetchedTimestamp(timestamp: Date): Promise<void>;
+}
+
+// infrastructure/repositories/RssFeedRepository.ts
+export class RssFeedRepository implements IFeedRepository {
+  // 実装...
+}
+```
+
+### 4. Domain Service（ドメインサービス）
+複数のエンティティにまたがるビジネスロジック：
+
+```typescript
+// domain/services/PostFormattingService.ts
+export class PostFormattingService {
+  formatForBluesky(item: FeedItem, summary: Summary): Post {
+    // 複雑なフォーマットロジック
+  }
+}
+```
+
+### 5. Application Service（アプリケーションサービス）
+ユースケースの実装：
+
+```typescript
+// application/usecases/FetchAndNotifyUseCase.ts
+export class FetchAndNotifyUseCase {
+  constructor(
+    private feedRepo: IFeedRepository,
+    private postRepo: IPostRepository,
+    private summaryService: ISummaryService,
+  ) {}
+
+  async execute(feedUrl: string): Promise<void> {
+    // ユースケースの実装
+  }
+}
+```
+
+## レイヤー依存ルール
+
+```
+domain層 ←─── application層 ←─── infrastructure層
+   ↑                                    ↓
+   └────────────── 依存性の逆転 ────────┘
+```
+
+- **domain層**: どの層にも依存しない（純粋なビジネスロジック）
+- **application層**: domainに依存（インターフェース経由）
+- **infrastructure層**: domain/applicationに依存（実装を提供）
+- **依存性の逆転**: repositoryはdomainでインターフェース定義、infrastructureで実装
+
+## 命名規則
+
+### ドメイン層
+- **Entity/Value Object**: 名詞（`FeedItem`, `Url`, `Summary`）
+- **Repository Interface**: `I` + 名詞 + `Repository`（`IFeedRepository`）
+- **Domain Service**: 名詞 + `Service`（`PostFormattingService`）
+
+### アプリケーション層
+- **Use Case**: 動詞 + `UseCase`（`FetchAndNotifyUseCase`）
+- **DTO**: 名詞 + `Dto`（`NotificationDto`）
+
+### インフラストラクチャ層
+- **Repository実装**: 名詞 + `Repository`（`RssFeedRepository`）
+- **外部サービス**: 名詞 + `Client` or `Service`（`BlueskyApiClient`）
+
+### 共通
+- **変数名・関数名**: `camelCase`（例: `fetchFeedItems`, `generateSummary`）
+- **型・インターフェース**: `PascalCase`（例: `FeedItem`, `BlueskyPostProps`）
+- **定数**: `UPPER_SNAKE_CASE`（例: `MAX_RETRY_COUNT`, `API_TIMEOUT`）
+- **ファイル名**: 機能を表す名前で統一（例: `fetchOpenGraphData.ts`）
+
+## コード品質原則
+
+### ドメイン層
+- ビジネスロジックをここに集約
+- 外部ライブラリへの依存を最小化
+- 不変性を重視（Value Objectは不変）
+- ドメインモデルは自己検証（バリデーションをコンストラクタで）
+
+### アプリケーション層
+- ユースケースごとに1クラス
+- トランザクション境界を管理
+- エラーハンドリングを統一
+- DTOで層間のデータ受け渡し
+
+### インフラストラクチャ層
+- 外部システムの詳細を隠蔽
+- リトライやタイムアウトをここで実装
+- 環境依存のコードを集約
+
+### 全層共通
+- 1つの関数/メソッドは1つの責任を持つ
+- 関数は30行以内を目安に（複雑な場合は分割）
+- エラーハンドリングは必須（try-catch、エラークラスの活用）
+- 型は明示的に定義し、`any`は避ける
+- コメントは「なぜ」を説明（コード自体が「何を」説明すべき）
+- マジックナンバーは定数化
+
+## セキュリティ
+
+- 機密情報は環境変数で管理（`config/env.ts`経由）
+- 外部入力は必ずバリデーション
+- APIキーやトークンはログに出力しない
+- 依存パッケージは定期的に更新
+
+## パフォーマンス
+
+- API呼び出しはリトライとタイムアウトを設定
+- 画像処理は適切なサイズに最適化
+- 不要な再計算を避ける（メモ化、キャッシュの活用）
+
+## テスト戦略
+
+### ドメイン層のテスト
+- 純粋な単体テスト（外部依存なし）
+- ビジネスロジックを重点的に
+- Value Objectの不変性を検証
+
+```typescript
+// tests/domain/models/Url_test.ts
+Deno.test("無効なURLの場合はエラーをスローする", () => {
+  assertThrows(
+    () => Url.create("invalid-url"),
+    Error,
+    "無効なURL"
+  );
+});
+```
+
+### アプリケーション層のテスト
+- モックを使った統合テスト
+- ユースケースのシナリオテスト
+- エラーハンドリングの検証
+
+```typescript
+// tests/application/usecases/FetchAndNotifyUseCase_test.ts
+Deno.test("フィード取得と通知が正常に完了する", async () => {
+  const mockRepo = new MockFeedRepository();
+  const useCase = new FetchAndNotifyUseCase(mockRepo, /*...*/);
+
+  await useCase.execute("https://example.com/feed");
+
+  assert(mockRepo.fetchLatestItemsCalled);
+});
+```
+
+### インフラストラクチャ層のテスト
+- 外部サービスとの結合テスト
+- モックサーバーを使用
+- カバレッジは70%以上を目標
+
+## 開発ワークフロー
+
+### 1. ドメインモデリング
+- ユビキタス言語の定義
+- エンティティとValue Objectの抽出
+- ドメインサービスの識別
+
+### 2. インターフェース設計
+- リポジトリインターフェースの定義
+- ドメイン層に配置
+
+### 3. ユースケース実装
+- アプリケーションサービスの作成
+- ドメインモデルを組み合わせる
+
+### 4. インフラ実装
+- リポジトリの実装
+- 外部サービスクライアントの実装
+
+### 5. テスト
+- ドメイン層から順にテスト
+- 依存性注入でモック化
+
+### 6. Git操作
+- ブランチ作成: `@branch-name-rule.mdc` に従う
+- コミット: `@commit-message-rule.mdc` に従う
+- 小さな単位で実装し、こまめにコミット
+
+## ツール活用
+
+### Deno
+- **フォーマット**: `deno fmt` で自動整形
+- **リント**: `deno lint` でコード品質チェック
+- **型チェック**: `deno check main.ts` で型安全性確保
+- **テスト**: `deno test` でテスト実行
+
+### Git Hooks (lefthook.yml)
+- コミット前にリントとテストを自動実行
+- コード品質を自動保証
+
+### ドキュメント
+- **README.md**: プロジェクトの目的、セットアップ、使い方
+- **_memo/**: 設計判断、リファクタリング記録
+- **コードコメント**: 複雑なロジックの説明
+
+# 段階的な移行戦略
+
+既存のコードベースをDDDに移行する場合：
+
+## Phase 1: Value Objectの導入
+1. `Url`, `Summary`などの値オブジェクトを作成
+2. 既存のstring型を徐々に置き換え
+
+## Phase 2: レイヤー構造の整理
+1. `domain/`, `application/`, `infrastructure/`ディレクトリを作成
+2. 既存のファイルを適切な層に移動
+
+## Phase 3: Repositoryパターンの導入
+1. リポジトリインターフェースをdomainに定義
+2. 既存の関数をリポジトリ実装に変換
+
+## Phase 4: Use Caseの抽出
+1. main.tsのロジックをユースケースクラスに移動
+2. 依存性注入を実装
+
+## Phase 5: テストの充実
+1. ドメイン層のテストを追加
+2. モックを使ったアプリケーション層のテスト
+
+# 関連ルール
+
+開発時は以下のルールも参照してください：
+- **Git ブランチ命名**: `@branch-name-rule.mdc`
+- **Git コミットメッセージ**: `@commit-message-rule.mdc`

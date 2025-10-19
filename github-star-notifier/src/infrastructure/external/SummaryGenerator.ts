@@ -1,6 +1,8 @@
 import { GoogleGenAI } from 'npm:@google/genai';
-import { GEMINI_CONFIG, RETRY_CONFIG } from './config/constants.ts';
-import { retry } from './utils/retry.ts';
+import { Summary } from '../../domain/models/index.ts';
+import { GEMINI_CONFIG, RETRY_CONFIG } from '../../config/constants.ts';
+import { retry } from '../../utils/retry.ts';
+import { logger } from '../../utils/logger.ts';
 
 const systemInstruction = `
 # Role
@@ -36,22 +38,31 @@ oxc-project/oxc の場合:
 OxcはRust製のJS/TSツール群で、パーサーやリンターを提供し既存ツールより大幅な高速化を目指すっぽい。
 `;
 
+/**
+ * AIを使用して要約を生成する
+ *
+ * @param textContent - 要約対象のテキストコンテンツ
+ * @param apiKey - Gemini APIキー
+ * @param modelName - 使用するモデル名
+ * @param url - 元のURL（ログ記録用）
+ * @returns 生成された要約（Summary Value Object）。失敗時は空の要約を返す
+ */
 export default async (
   textContent: string,
   apiKey: string,
   modelName: string,
   url?: string,
-): Promise<string> => {
+): Promise<Summary | null> => {
   if (!textContent || textContent.trim() === '') {
-    console.warn('Input textContent is empty for summary. Returning empty string.');
-    return '';
+    logger.warn('Input textContent is empty for summary. Returning null.');
+    return null;
   }
 
   const ai = new GoogleGenAI({
     apiKey,
   });
 
-  return await retry(
+  const responseText = await retry(
     async () => {
       // toolsを設定（urlContextとgoogleSearchを有効化）
       const tools = [
@@ -94,15 +105,29 @@ export default async (
       });
 
       const responseText = (result.text || '').trim();
-      console.log('Success createSummary');
-      console.log(responseText);
+      logger.info('Successfully created summary', { url, length: responseText.length });
+      logger.debug('Summary text', { responseText });
       return responseText;
     },
     {
       maxRetries: RETRY_CONFIG.SUMMARY_MAX_RETRIES,
       onRetry: (error, attempt) => {
-        console.log(`Retry createSummary (attempt ${attempt}):`, error);
+        logger.warn('Retrying summary creation', { attempt, error: String(error), url });
       },
     },
   );
+
+  // 空の応答の場合はnullを返す
+  if (!responseText || responseText.trim() === '') {
+    logger.warn('AI returned empty response. Returning null.');
+    return null;
+  }
+
+  // Summary Value Objectを生成（Bluesky用に短縮）
+  try {
+    return Summary.createForBluesky(responseText);
+  } catch (error) {
+    logger.error('Failed to create Summary value object', error, { responseText });
+    return null;
+  }
 };

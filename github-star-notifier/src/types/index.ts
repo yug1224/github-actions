@@ -10,8 +10,8 @@ export interface FeedItem extends FeedEntry {
   summary: string;
 }
 
-// OGP関連の型
-export interface OgpResult {
+// Open Graph Protocol関連の型
+export interface OpenGraphData {
   ogTitle?: string;
   ogDescription?: string;
   ogImage?: Array<{
@@ -22,46 +22,45 @@ export interface OgpResult {
   }>;
 }
 
-// Bluesky投稿用プロパティ
-export interface BlueskyProps {
-  bskyText: RichText;
+// Bluesky投稿用の型
+export interface BlueskyPostContent {
+  richText: RichText;
 }
 
-export interface CreateBlueskyPropsParams {
+export interface BlueskyFormatterParams {
   agent: AtpAgent;
   item: FeedItem;
 }
 
-// X投稿用プロパティ
-export interface XProps {
-  xText: string;
+// Webhook通知用の型
+export interface WebhookMessage {
+  content: string;
 }
 
-export interface CreateXPropsParams {
+export interface WebhookFormatterParams {
   item: FeedItem;
 }
 
-// 画像リサイズ結果
-export interface ResizedImageResult {
+// 画像処理結果
+export interface ProcessedImageResult {
   mimeType?: string;
   resizedImage?: Uint8Array;
 }
 
 // Bluesky投稿パラメータ
-export interface PostBlueskyParams {
+export interface PublishToBlueskyParams {
   agent: AtpAgent;
-  rt: RichText;
+  richText: RichText;
   title: string;
   link: string;
-  description: string;
   mimeType?: string;
   image?: Uint8Array;
 }
 
 // Blob upload結果
 export interface UploadBlobResult {
-  $type?: 'blob';
-  ref?: { $link: string };
-  mimeType?: string;
-  size?: number;
+  $type: 'blob';
+  ref: { $link: string };
+  mimeType: string;
+  size: number;
 }

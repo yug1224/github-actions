@@ -1,27 +1,24 @@
 import { abortable } from 'jsr:@std/async';
 import AtprotoAPI from 'npm:@atproto/api';
-import type { PostBlueskyParams, UploadBlobResult } from './types/index.ts';
-import { RETRY_CONFIG } from './config/constants.ts';
-import { retry } from './utils/retry.ts';
+import type { PublishToBlueskyParams, UploadBlobResult } from '../../types/index.ts';
+import { RETRY_CONFIG } from '../../config/constants.ts';
+import { retry } from '../../utils/retry.ts';
+import { logger } from '../../utils/logger.ts';
 
 export default async ({
   agent,
-  rt,
+  richText,
   title,
   link,
-  description,
   mimeType,
   image,
-}: PostBlueskyParams): Promise<void> => {
+}: PublishToBlueskyParams): Promise<void> => {
   const thumb = await (async (): Promise<UploadBlobResult | undefined> => {
     if (!(image instanceof Uint8Array && typeof mimeType === 'string')) return;
-    console.log(
-      JSON.stringify(
-        { imageByteLength: image.byteLength, encoding: mimeType },
-        null,
-        2,
-      ),
-    );
+    logger.debug('Uploading image', {
+      imageByteLength: image.byteLength,
+      encoding: mimeType,
+    });
 
     try {
       return await retry(
@@ -29,7 +26,9 @@ export default async ({
           const c = new AbortController();
           // タイムアウト設定
           const timeoutId = setTimeout(() => {
-            console.log('Upload timeout');
+            logger.warn('Image upload timeout', {
+              timeout: RETRY_CONFIG.IMAGE_UPLOAD_TIMEOUT_MS,
+            });
             c.abort();
           }, RETRY_CONFIG.IMAGE_UPLOAD_TIMEOUT_MS);
 
@@ -41,7 +40,9 @@ export default async ({
               }),
               c.signal,
             );
-            console.log('Success uploadImage');
+            logger.info('Successfully uploaded image', {
+              size: uploadedImage.data.blob.size,
+            });
 
             // 投稿オブジェクトに画像を追加
             return {
@@ -59,12 +60,12 @@ export default async ({
         {
           maxRetries: RETRY_CONFIG.IMAGE_UPLOAD_MAX_RETRIES,
           onRetry: (error, attempt) => {
-            console.log(`Retry uploadImage (attempt ${attempt}):`, error);
+            logger.warn('Retrying image upload', { attempt, error: String(error) });
           },
         },
       );
     } catch (error) {
-      console.log('Failed uploadImage after retries:', error);
+      logger.error('Failed to upload image after retries', error);
       return undefined;
     }
   })();
@@ -73,21 +74,30 @@ export default async ({
     & Partial<AtprotoAPI.AppBskyFeedPost.Record>
     & Omit<AtprotoAPI.AppBskyFeedPost.Record, 'createdAt'> = {
       $type: 'app.bsky.feed.post',
-      text: rt.text,
-      facets: rt.facets,
-      embed: {
-        $type: 'app.bsky.embed.external',
-        external: {
-          uri: link,
-          title,
-          description: '', // 一時的にdescriptionは空にする
-          thumb,
+      text: richText.text,
+      facets: richText.facets,
+      embed: thumb
+        ? {
+          $type: 'app.bsky.embed.external',
+          external: {
+            uri: link,
+            title,
+            description: '',
+            thumb: thumb as unknown as AtprotoAPI.AppBskyEmbedExternal.External['thumb'],
+          },
+        }
+        : {
+          $type: 'app.bsky.embed.external',
+          external: {
+            uri: link,
+            title,
+            description: '',
+          },
         },
-      },
       langs: ['ja'],
     };
 
-  console.log(JSON.stringify(postObj, null, 2));
+  logger.debug('Posting to Bluesky', { link, title });
   await agent.post(postObj);
-  console.log('Success postBluesky');
+  logger.info('Successfully posted to Bluesky', { link });
 };
