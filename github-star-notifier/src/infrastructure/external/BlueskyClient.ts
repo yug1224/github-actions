@@ -1,5 +1,5 @@
-import { abortable } from 'jsr:@std/async';
-import AtprotoAPI from 'npm:@atproto/api';
+import { abortable } from '@std/async';
+import * as AtprotoAPI from '@atproto/api';
 import type { PublishToBlueskyParams, UploadBlobResult } from '../../types/index.ts';
 import { RETRY_CONFIG } from '../../config/constants.ts';
 import { retry } from '../../utils/retry.ts';

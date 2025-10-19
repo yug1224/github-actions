@@ -2,7 +2,7 @@
  * Open Graph Protocol (OGP) データを取得するモジュール
  */
 
-import ogs from 'npm:open-graph-scraper';
+import ogs from 'open-graph-scraper';
 import { OpenGraphData, Url } from '../../domain/models/index.ts';
 import { USER_AGENT } from '../../config/constants.ts';
 import { logger } from '../../utils/logger.ts';

@@ -2,7 +2,7 @@
  * RSS feedから記事リストを取得するモジュール
  */
 
-import { type FeedEntry, parseFeed } from 'jsr:@mikaelporttila/rss';
+import { type FeedEntry, parseFeed } from '@mikaelporttila/rss';
 import { MAX_FEED_ITEMS, PATTERNS } from '../../config/constants.ts';
 import { logger } from '../../utils/logger.ts';
 import { NetworkError } from '../../utils/errors.ts';

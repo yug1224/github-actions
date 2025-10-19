@@ -1,9 +1,4 @@
-import {
-  ImageMagick,
-  type IMagickImage,
-  initialize,
-  MagickFormat,
-} from 'https://deno.land/x/imagemagick_deno@0.0.31/mod.ts';
+import { ImageMagick, type IMagickImage, initialize, MagickFormat } from 'imagemagick';
 import type { ProcessedImageResult } from '../../types/index.ts';
 import { IMAGE_CONFIG, RETRY_CONFIG } from '../../config/constants.ts';
 import { retry } from '../../utils/retry.ts';
@@ -19,6 +14,8 @@ export default async (url: string, timestamp: number): Promise<ProcessedImageRes
 
         // 画像が取得できなかった場合はエラーをスロー
         if (!res.ok || !contentType?.includes('image')) {
+          // レスポンスボディを消費してリソースリークを防ぐ
+          await res.body?.cancel();
           throw new Error(`Failed to fetch image: ${res.status} ${res.statusText}`);
         }
         return res;

@@ -2,8 +2,8 @@
  * Webページから読みやすいテキストコンテンツを抽出するモジュール
  */
 
-import { JSDOM } from 'npm:jsdom';
-import { Readability } from 'npm:@mozilla/readability';
+import { JSDOM } from 'jsdom';
+import { Readability } from '@mozilla/readability';
 import { logger } from '../../utils/logger.ts';
 
 /**

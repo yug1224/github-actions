@@ -1,4 +1,4 @@
-import AtprotoAPI from 'npm:@atproto/api';
+import * as AtprotoAPI from '@atproto/api';
 import type { BlueskyFormatterParams, BlueskyPostContent } from '../../types/index.ts';
 import { logger } from '../../utils/logger.ts';
 const { RichText } = AtprotoAPI;

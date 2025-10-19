@@ -4,7 +4,7 @@
  * RSSフィードの取得とタイムスタンプ管理を抽象化します。
  */
 
-import type { FeedEntry } from 'jsr:@mikaelporttila/rss';
+import type { FeedEntry } from '@mikaelporttila/rss';
 
 /**
  * フィードリポジトリのインターフェース

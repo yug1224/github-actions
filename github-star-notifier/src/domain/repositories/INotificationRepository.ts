@@ -4,7 +4,7 @@
  * SNS投稿とWebhook通知を抽象化します。
  */
 
-import type { AtpAgent, RichText } from 'npm:@atproto/api';
+import type { AtpAgent, RichText } from '@atproto/api';
 
 /**
  * 通知リポジトリのインターフェース

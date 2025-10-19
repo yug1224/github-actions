@@ -1,6 +1,6 @@
-import 'jsr:@std/dotenv/load';
-import AtprotoAPI from 'npm:@atproto/api';
-import type { AtpAgent } from 'npm:@atproto/api';
+import '@std/dotenv';
+import * as AtprotoAPI from '@atproto/api';
+import type { AtpAgent } from '@atproto/api';
 import { validateAndGetEnv } from './src/config/env.ts';
 import { BLUESKY_SERVICE_URL, MAX_POST_COUNT } from './src/config/constants.ts';
 import { logger } from './src/utils/logger.ts';
