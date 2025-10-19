@@ -4,8 +4,10 @@
     "jsr:@b-fuze/deno-dom@*": "0.1.49",
     "jsr:@maxim-mazurok/sax-ts@1.2.13": "1.2.13",
     "jsr:@mikaelporttila/rss@*": "1.1.2",
+    "jsr:@std/assert@*": "1.0.15",
     "jsr:@std/async@*": "1.0.13",
     "jsr:@std/dotenv@*": "0.225.5",
+    "jsr:@std/internal@^1.0.12": "1.0.12",
     "jsr:@std/path@*": "1.1.0",
     "npm:@atproto/api@*": "0.15.16",
     "npm:@imagemagick/magick-wasm@0.0.31": "0.0.31",
@@ -26,11 +28,20 @@
         "jsr:@maxim-mazurok/sax-ts"
       ]
     },
+    "@std/assert@1.0.15": {
+      "integrity": "d64018e951dbdfab9777335ecdb000c0b4e3df036984083be219ce5941e4703b",
+      "dependencies": [
+        "jsr:@std/internal"
+      ]
+    },
     "@std/async@1.0.13": {
       "integrity": "1d76ca5d324aef249908f7f7fe0d39aaf53198e5420604a59ab5c035adc97c96"
     },
     "@std/dotenv@0.225.5": {
       "integrity": "9ce6f9d0ec3311f74a32535aa1b8c62ed88b1ab91b7f0815797d77a6f60c922f"
+    },
+    "@std/internal@1.0.12": {
+      "integrity": "972a634fd5bc34b242024402972cd5143eac68d8dffaca5eaa4dba30ce17b027"
     },
     "@std/path@1.1.0": {
       "integrity": "ddc94f8e3c275627281cbc23341df6b8bcc874d70374f75fec2533521e3d6886"

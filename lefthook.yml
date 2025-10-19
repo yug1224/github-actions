@@ -1,36 +1,54 @@
 # Lefthook Configuration
-# Git hooks の自動実行設定（github-star-notifier専用）
+# Git hooks の自動実行設定
 
-# pre-commit: コミット前に実行（ステージされたファイルのみ対象）
 pre-commit:
   parallel: true
   commands:
-    # フォーマットチェック
-    format:
+    # github-star-notifier
+    format-github-star:
       glob: "github-star-notifier/**/*.{ts,tsx,js,jsx,json,jsonc}"
       run: deno fmt {staged_files}
       stage_fixed: true
 
-    # リントチェック
-    lint:
+    lint-github-star:
       glob: "github-star-notifier/**/*.{ts,tsx}"
       run: deno lint {staged_files}
 
-    # 型チェック
-    type-check:
+    type-check-github-star:
       glob: "github-star-notifier/**/*.{ts,tsx}"
       run: cd github-star-notifier && deno check main.ts
 
-# pre-push: プッシュ前に実行（全ファイル対象）
+    # rss-feed-notifier
+    format-rss-feed:
+      glob: "rss-feed-notifier/**/*.{ts,tsx,js,jsx,json,jsonc}"
+      run: deno fmt {staged_files}
+      stage_fixed: true
+
+    lint-rss-feed:
+      glob: "rss-feed-notifier/**/*.{ts,tsx}"
+      run: deno lint {staged_files}
+
+    type-check-rss-feed:
+      glob: "rss-feed-notifier/**/*.{ts,tsx}"
+      run: cd rss-feed-notifier && deno check main.ts
+
 pre-push:
   parallel: false
   commands:
-    # テスト実行
-    test:
+    # github-star-notifier
+    test-github-star:
       glob: "github-star-notifier/**/*.{ts,tsx}"
       run: cd github-star-notifier && deno test tests/
 
-    # 最終チェック
-    final-check:
+    final-check-github-star:
       glob: "github-star-notifier/**/*.{ts,tsx}"
       run: cd github-star-notifier && deno check main.ts
+
+    # rss-feed-notifier
+    test-rss-feed:
+      glob: "rss-feed-notifier/**/*.{ts,tsx}"
+      run: cd rss-feed-notifier && deno test tests/
+
+    final-check-rss-feed:
+      glob: "rss-feed-notifier/**/*.{ts,tsx}"
+      run: cd rss-feed-notifier && deno check main.ts

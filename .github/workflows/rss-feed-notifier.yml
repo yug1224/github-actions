@@ -1,86 +1,75 @@
 name: RSS Feed Notifier
+
 on:
   schedule:
-    # 15分ごとに実行
-    - cron: '*/15 * * * *'
+    - cron: "*/15 * * * *"
   workflow_dispatch:
+
 jobs:
   rss-feed-notifier:
     runs-on: macos-latest
     defaults:
       run:
         working-directory: rss-feed-notifier
-    # 15分以上かかったらタイムアウト
     timeout-minutes: 15
+
     steps:
       # リポジトリのチェックアウト
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
       # Denoのセットアップ
       - name: Setup Deno
         uses: denoland/setup-deno@909cc5acb0fdd60627fb858598759246509fa755 # v2.0.2
         with:
           deno-version: v2.x
-      # 最終実行時刻のキャッシュを復元
-      - name: Restore Last Execution Time Cache
+
+      # 必要なディレクトリの作成
+      - name: Create directories
+        run: mkdir -p data temp
+
+      # タイムスタンプキャッシュの復元
+      - name: Restore timestamp cache
+        id: restore_timestamp
         uses: actions/cache/restore@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
         with:
-          path: |
-            rss-feed-notifier/.timestamp
-          key: RssFeedNotifier-LastExecutionTime
-          restore-keys: RssFeedNotifier-LastExecutionTime-
-      # アイテムリストのキャッシュを復元
-      - name: Restore Item List Cache
+          path: rss-feed-notifier/data/.timestamp
+          key: rss-feed-notifier-timestamp-${{ github.run_id }}
+          restore-keys: |
+            rss-feed-notifier-timestamp-
+
+      # アイテムリストキャッシュの復元
+      - name: Restore item list cache
+        id: restore_itemlist
         uses: actions/cache/restore@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
         with:
-          path: |
-            rss-feed-notifier/.itemList.json
-          key: RssFeedNotifier-ItemList
-          restore-keys: RssFeedNotifier-ItemList-
-      # .timestampファイルの存在チェック
-      - name: Check timestamp file exists
-        id: check_timestamp
-        uses: andstor/file-existence-action@076e0072799f4942c8bc574a82233e1e4d13e9d6 # v3.0.0
-        with:
-          files: rss-feed-notifier/.timestamp
-      # .itemList.jsonファイルの存在チェック
-      - name: Check itemlist file exists
-        id: check_itemlist
-        uses: andstor/file-existence-action@076e0072799f4942c8bc574a82233e1e4d13e9d6 # v3.0.0
-        with:
-          files: rss-feed-notifier/.itemList.json
-      # 現在時刻とアイテムリストの初期化
-      - name: Set Current Time
-        if: steps.check_timestamp.outputs.files_exists == 'false'
-        run: |
-          echo "$(deno eval 'console.log(new Date().getTime())')" > .timestamp
-      - name: Set Current Item List
-        if: steps.check_itemlist.outputs.files_exists == 'false'
-        run: |
-          echo "[]" > .itemList.json
+          path: rss-feed-notifier/data/.itemList.json
+          key: rss-feed-notifier-itemlist-${{ github.run_id }}
+          restore-keys: |
+            rss-feed-notifier-itemlist-
+
       # dotenvxのインストール
       - name: Install dotenvx
         run: curl -sfS https://dotenvx.sh/install.sh | sh
+
       # Denoの実行
-      - name: Deno Run
-        run: |
-          dotenvx run -- deno run -A main.ts
-          ls -la
+      - name: Run notifier
+        run: dotenvx run -- deno run -A main.ts
         env:
-          DOTENV_PRIVATE_KEY: ${{secrets.DOTENV_PRIVATE_KEY_RSS_FEED_NOTIFIER}}
-      # 最終実行時刻のキャッシュを保存
-      - name: Save Last Execution Time Cache
+          DOTENV_PRIVATE_KEY: ${{ secrets.DOTENV_PRIVATE_KEY_RSS_FEED_NOTIFIER }}
+
+      # タイムスタンプキャッシュの保存
+      - name: Save timestamp cache
         uses: actions/cache/save@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
-        if: ${{always()}}
+        if: always()
         with:
-          path: |
-            rss-feed-notifier/.timestamp
-          key: RssFeedNotifier-LastExecutionTime-${{github.run_id}}
-      # アイテムリストのキャッシュを保存
-      - name: Save Item List Cache
+          path: rss-feed-notifier/data/.timestamp
+          key: rss-feed-notifier-timestamp-${{ github.run_id }}
+
+      # アイテムリストキャッシュの保存
+      - name: Save item list cache
         uses: actions/cache/save@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
-        if: ${{always()}}
+        if: always()
         with:
-          path: |
-            rss-feed-notifier/.itemList.json
-          key: RssFeedNotifier-ItemList-${{github.run_id}}
+          path: rss-feed-notifier/data/.itemList.json
+          key: rss-feed-notifier-itemlist-${{ github.run_id }}
