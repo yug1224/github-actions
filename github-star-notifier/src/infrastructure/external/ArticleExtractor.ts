@@ -4,6 +4,7 @@
 
 import { JSDOM } from 'npm:jsdom';
 import { Readability } from 'npm:@mozilla/readability';
+import { logger } from '../../utils/logger.ts';
 
 /**
  * 指定されたURLから記事の本文を抽出する
@@ -18,7 +19,7 @@ export default async (url: string): Promise<string> => {
   try {
     const response = await fetch(url);
     if (!response.ok) {
-      console.error(`Failed to fetch ${url}: ${response.status} ${response.statusText}`);
+      logger.warn('Failed to fetch content', { url, status: response.status });
       return '';
     }
     const html = await response.text();
@@ -27,13 +28,17 @@ export default async (url: string): Promise<string> => {
     const article = reader.parse();
 
     if (article && article.textContent) {
+      logger.debug('Successfully extracted content', {
+        url,
+        length: article.textContent.length,
+      });
       return article.textContent.trim();
     } else {
-      console.warn(`Readability could not parse content from ${url}`);
+      logger.warn('Readability could not parse content', { url });
       return '';
     }
   } catch (error) {
-    console.error(`Error extracting content from ${url}:`, error);
+    logger.error('Error extracting content', error, { url });
     return '';
   }
 };

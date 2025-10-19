@@ -8,9 +8,9 @@ import { retry } from '../../src/utils/retry.ts';
 Deno.test('retry - 成功ケース', async () => {
   let callCount = 0;
   const result = await retry(
-    async () => {
+    () => {
       callCount++;
-      return 'success';
+      return Promise.resolve('success');
     },
     { maxRetries: 3 },
   );
@@ -22,12 +22,12 @@ Deno.test('retry - 成功ケース', async () => {
 Deno.test('retry - 1回失敗後に成功', async () => {
   let callCount = 0;
   const result = await retry(
-    async () => {
+    () => {
       callCount++;
       if (callCount === 1) {
         throw new Error('First attempt fails');
       }
-      return 'success';
+      return Promise.resolve('success');
     },
     { maxRetries: 3 },
   );
@@ -39,9 +39,9 @@ Deno.test('retry - 1回失敗後に成功', async () => {
 Deno.test('retry - 最大リトライ回数を超える', async () => {
   let callCount = 0;
   await assertRejects(
-    async () => {
-      await retry(
-        async () => {
+    () => {
+      return retry(
+        () => {
           callCount++;
           throw new Error('Always fails');
         },
@@ -60,12 +60,12 @@ Deno.test('retry - onRetryコールバック', async () => {
   let callCount = 0;
 
   await retry(
-    async () => {
+    () => {
       callCount++;
       if (callCount <= 2) {
         throw new Error('Fail');
       }
-      return 'success';
+      return Promise.resolve('success');
     },
     {
       maxRetries: 3,
@@ -82,9 +82,9 @@ Deno.test('retry - shouldRetry条件', async () => {
   let callCount = 0;
 
   await assertRejects(
-    async () => {
-      await retry(
-        async () => {
+    () => {
+      return retry(
+        () => {
           callCount++;
           throw new Error('Special error');
         },

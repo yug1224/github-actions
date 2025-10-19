@@ -1,0 +1,35 @@
+# Lefthook Configuration
+# Git hooks の自動実行設定（github-star-notifier専用）
+
+# pre-commit: コミット前に実行（ステージされたファイルのみ対象）
+pre-commit:
+  parallel: true
+  commands:
+    # フォーマットチェック
+    format:
+      glob: "github-star-notifier/**/*.{ts,tsx,js,jsx,json,jsonc}"
+      run: deno fmt --check {staged_files}
+
+    # リントチェック
+    lint:
+      glob: "github-star-notifier/**/*.{ts,tsx}"
+      run: deno lint {staged_files}
+
+    # 型チェック
+    type-check:
+      glob: "github-star-notifier/**/*.{ts,tsx}"
+      run: cd github-star-notifier && deno check main.ts
+
+# pre-push: プッシュ前に実行（全ファイル対象）
+pre-push:
+  parallel: false
+  commands:
+    # テスト実行
+    test:
+      glob: "github-star-notifier/**/*.{ts,tsx}"
+      run: cd github-star-notifier && deno test tests/
+
+    # 最終チェック
+    final-check:
+      glob: "github-star-notifier/**/*.{ts,tsx}"
+      run: cd github-star-notifier && deno check main.ts
