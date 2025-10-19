@@ -4,7 +4,7 @@
  * RSSフィードの取得とタイムスタンプ管理の実装。
  */
 
-import type { FeedEntry } from 'jsr:@mikaelporttila/rss';
+import type { FeedEntry } from '@mikaelporttila/rss';
 import type { IFeedRepository } from '../../domain/repositories/index.ts';
 import fetchFeedItems from '../external/RssFeedClient.ts';
 

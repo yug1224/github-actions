@@ -4,7 +4,7 @@
  * SNS投稿とWebhook通知の実装。
  */
 
-import type { AtpAgent, RichText } from 'npm:@atproto/api';
+import type { AtpAgent, RichText } from '@atproto/api';
 import type { INotificationRepository } from '../../domain/repositories/index.ts';
 import publishToBluesky from '../external/BlueskyClient.ts';
 import sendWebhookNotification from '../external/WebhookClient.ts';

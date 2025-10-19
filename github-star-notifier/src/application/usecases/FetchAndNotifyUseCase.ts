@@ -4,8 +4,8 @@
  * フィードを取得し、SNSに投稿するユースケース。
  */
 
-import type { AtpAgent } from 'npm:@atproto/api';
-import type { FeedEntry } from 'jsr:@mikaelporttila/rss';
+import type { AtpAgent } from '@atproto/api';
+import type { FeedEntry } from '@mikaelporttila/rss';
 import type {
   IContentRepository,
   IFeedRepository,

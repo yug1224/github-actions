@@ -8,7 +8,8 @@ pre-commit:
     # フォーマットチェック
     format:
       glob: "github-star-notifier/**/*.{ts,tsx,js,jsx,json,jsonc}"
-      run: deno fmt --check {staged_files}
+      run: deno fmt {staged_files}
+      stage_fixed: true
 
     # リントチェック
     lint:

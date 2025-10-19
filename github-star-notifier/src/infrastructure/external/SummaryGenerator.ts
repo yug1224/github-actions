@@ -1,4 +1,4 @@
-import { GoogleGenAI } from 'npm:@google/genai';
+import { GoogleGenAI } from '@google/genai';
 import { Summary } from '../../domain/models/index.ts';
 import { GEMINI_CONFIG, RETRY_CONFIG } from '../../config/constants.ts';
 import { retry } from '../../utils/retry.ts';
