@@ -34,6 +34,39 @@ export const GEMINI_CONFIG = {
   RESPONSE_MIME_TYPE: 'text/plain',
 } as const;
 
+// サマリー検証設定
+export const VALIDATION_CONFIG = {
+  // 検証失敗時の最大再試行回数
+  MAX_VALIDATION_RETRIES: 3,
+  // サマリーの最大文字数
+  MAX_SUMMARY_LENGTH: 100,
+  // 1文目の許可される文末パターン（伝聞系・推測系・印象系）
+  FIRST_SENTENCE_ENDINGS: [
+    'らしい',
+    'やつ',
+    'ツール',
+    'かも',
+    'っぽい',
+    'みたい',
+    'そう',
+    '印象',
+    'ところ',
+  ],
+  // 2文目の許可される文末パターン（期待系・感想系）
+  SECOND_SENTENCE_ENDINGS: [
+    '期待',
+    '楽しみ',
+    '試したい',
+    '良いな',
+    'かも',
+    '気になる',
+    '使えそう',
+    '使えそうかな',
+    '便利そう',
+    '刺さりそうかも',
+  ],
+} as const;
+
 // User Agent
 export const USER_AGENT = {
   OGP_FETCH: 'Twitterbot',
