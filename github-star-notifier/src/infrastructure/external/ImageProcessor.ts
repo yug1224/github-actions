@@ -43,16 +43,23 @@ export default async (url: string, timestamp: number): Promise<ProcessedImageRes
       const tempFilePath = `${timestamp}.avif`;
 
       try {
-        const resizedImage = await ImageMagick.read(new Uint8Array(buffer), async (img: IMagickImage) => {
+        const resizedImage = await ImageMagick.read(new Uint8Array(buffer), (img: IMagickImage) => {
           img.resize(IMAGE_CONFIG.MAX_WIDTH, IMAGE_CONFIG.MAX_HEIGHT);
           img.quality = 100 - (retryCount * 2);
 
-          await img.write(MagickFormat.Avif, async (data: Uint8Array) => {
-            await Deno.writeFile(tempFilePath, data);
-            return;
+          // img.write()のコールバックで直接データを取得
+          let imageData: Uint8Array | null = null;
+          img.write(MagickFormat.Avif, (data: Uint8Array) => {
+            // データのコピーを作成（コールバック外で使用するため）
+            imageData = new Uint8Array(data);
           });
-          const resized = await Deno.readFile(tempFilePath);
-          return resized;
+
+          // デバッグ用にファイルにも保存
+          if (imageData) {
+            Deno.writeFileSync(tempFilePath, imageData);
+          }
+
+          return imageData!;
         });
 
         logger.debug('Resized image', {

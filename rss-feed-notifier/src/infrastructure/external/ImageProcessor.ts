@@ -98,19 +98,27 @@ export class ImageProcessor {
 
     const resizedImage = await ImageMagick.read(
       new Uint8Array(imageBuffer),
-      async (img: IMagickImage) => {
+      (img: IMagickImage) => {
         img.resize(IMAGE_CONFIG.MAX_WIDTH, IMAGE_CONFIG.MAX_HEIGHT);
         img.quality = quality;
 
-        const outputPath = `${FILE_PATHS.TEMP_DIR}${timestamp}.${IMAGE_CONFIG.FORMAT}`;
-        await img.write(
+        // img.write()のコールバックで直接データを取得
+        let imageData: Uint8Array | null = null;
+        img.write(
           MagickFormat.Avif,
-          async (data: Uint8Array) => {
-            await Deno.writeFile(outputPath, data);
+          (data: Uint8Array) => {
+            // データのコピーを作成（コールバック外で使用するため）
+            imageData = new Uint8Array(data);
           },
         );
 
-        return await Deno.readFile(outputPath);
+        // デバッグ用にファイルにも保存
+        const outputPath = `${FILE_PATHS.TEMP_DIR}${timestamp}.${IMAGE_CONFIG.FORMAT}`;
+        if (imageData) {
+          Deno.writeFileSync(outputPath, imageData);
+        }
+
+        return imageData!;
       },
     );
 
