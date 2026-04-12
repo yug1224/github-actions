@@ -5,6 +5,7 @@
     "jsr:@mikaelporttila/rss@*": "1.1.3",
     "jsr:@mikaelporttila/rss@^1.1.0": "1.1.3",
     "jsr:@std/assert@*": "1.0.15",
+    "jsr:@std/assert@^1.0.15": "1.0.15",
     "jsr:@std/async@1": "1.0.15",
     "jsr:@std/dotenv@0.225": "0.225.5",
     "jsr:@std/internal@^1.0.12": "1.0.12",
