@@ -131,10 +131,11 @@ github-star-notifier/
 - フィルタリング: 最終取得時刻以降の新着記事のみ
 
 ## 要約生成
-- AI: OpenAI GPT-4o-mini
-- 最大トークン数: 300
+- AI: Google Gemini（urlContext/googleSearchツール活用）
+- 文字数: 100文字以内（SUMMARY_RULES.MAX_LENGTH）
 - 言語: 日本語
-- フォーマット: 簡潔な説明文
+- フォーマット: 二文構成（1文目: 事実・特徴、2文目: 感想・評価）
+- 検証: ルールベース検証 + LLM検証の二段階
 
 ## Bluesky投稿
 - 文字数制限: 300文字
@@ -183,7 +184,7 @@ github-star-notifier/
 - `GITHUB_USERNAME`: GitHubユーザー名
 - `BLUESKY_IDENTIFIER`: Blueskyアカウント
 - `BLUESKY_PASSWORD`: Blueskyパスワード
-- `OPENAI_API_KEY`: OpenAI APIキー
+- `GOOGLE_AI_API_KEY`: Google Gemini APIキー
 - `WEBHOOK_URL`: 通知先WebhookURL
 
 ## 機密情報の取り扱い
