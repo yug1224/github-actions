@@ -14,7 +14,7 @@ import { FeedItem } from '../../domain/models/FeedItem.ts';
 import { OpenGraphData } from '../../domain/models/OpenGraphData.ts';
 import { Timestamp } from '../../domain/models/Timestamp.ts';
 import { logger } from '../../utils/logger.ts';
-import { MAX_POST_COUNT } from '../../config/constants.ts';
+import { PROCESSING_TIME_BUDGET_MS } from '../../config/constants.ts';
 
 /**
  * フィード取得と通知のユースケース
@@ -32,8 +32,12 @@ export class FetchAndNotifyUseCase {
    * ユースケースを実行する
    *
    * @param rssUrl - RSSフィードのURL
+   * @param processingTimeBudgetMs - 投稿処理に使う時間予算（ミリ秒）
    */
-  async execute(rssUrl: string): Promise<void> {
+  async execute(
+    rssUrl: string,
+    processingTimeBudgetMs: number = PROCESSING_TIME_BUDGET_MS,
+  ): Promise<void> {
     logger.info('フィード取得と通知のユースケースを開始します', { rssUrl });
 
     const feedUrl = Url.create(rssUrl);
@@ -56,12 +60,16 @@ export class FetchAndNotifyUseCase {
 
     logger.info('投稿するアイテム数', { count: itemsToPost.length });
 
+    const processingDeadline = Date.now() + processingTimeBudgetMs;
+
     // 各アイテムを処理
     let processedCount = 0;
     for (const item of itemsToPost) {
-      // 最大投稿数に達したら終了
-      if (processedCount >= MAX_POST_COUNT) {
-        logger.info('最大投稿数に達しました', { count: processedCount });
+      if (Date.now() >= processingDeadline) {
+        logger.info('処理時間予算に達しました', {
+          processedCount,
+          remainingCount: itemsToPost.length - processedCount,
+        });
         break;
       }
 

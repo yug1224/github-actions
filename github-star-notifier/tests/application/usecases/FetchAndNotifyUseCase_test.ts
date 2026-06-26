@@ -11,8 +11,8 @@ import type {
   ISummaryService,
 } from '../../../src/domain/repositories/index.ts';
 import { OpenGraphData, Summary, Url } from '../../../src/domain/models/index.ts';
-import type { FeedEntry } from 'jsr:@mikaelporttila/rss';
-import type { AtpAgent } from 'npm:@atproto/api';
+import type { FeedEntry } from '@mikaelporttila/rss';
+import type { AtpAgent } from '@atproto/api';
 
 /**
  * モックFeedRepository
@@ -88,8 +88,9 @@ class MockSummaryService implements ISummaryService {
 class MockNotificationRepository implements INotificationRepository {
   public blueskyCallCount = 0;
   public webhookCallCount = 0;
+  public processedLinks: string[] = [];
 
-  publishToBluesky(_params: {
+  publishToBluesky(params: {
     agent: unknown;
     richText: unknown;
     title: string;
@@ -98,6 +99,7 @@ class MockNotificationRepository implements INotificationRepository {
     image?: Uint8Array;
   }): Promise<void> {
     this.blueskyCallCount++;
+    this.processedLinks.push(params.link);
     return Promise.resolve();
   }
 
@@ -140,7 +142,7 @@ Deno.test('FetchAndNotifyUseCase - フィード取得と通知が正常に完了
   );
 
   const mockAgent = createMockAgent();
-  await useCase.execute('https://example.com/feed', mockAgent, undefined, 10);
+  await useCase.execute('https://example.com/feed', mockAgent, undefined);
 
   // 各リポジトリのメソッドが呼ばれたことを確認
   assert(feedRepo.fetchLatestItemsCalled, 'fetchLatestItems が呼ばれるべき');
@@ -178,7 +180,7 @@ Deno.test('FetchAndNotifyUseCase - フィードが空の場合は何もしない
   );
 
   const mockAgent = createMockAgent();
-  await useCase.execute('https://example.com/feed', mockAgent, undefined, 10);
+  await useCase.execute('https://example.com/feed', mockAgent, undefined);
 
   // 何も処理されないことを確認
   assert(!contentRepo.extractCalled, 'extractArticleContent は呼ばれないべき');
@@ -186,10 +188,9 @@ Deno.test('FetchAndNotifyUseCase - フィードが空の場合は何もしない
   assertEquals(notificationRepo.blueskyCallCount, 0, 'Bluesky投稿は呼ばれないべき');
 });
 
-Deno.test('FetchAndNotifyUseCase - 最大投稿数を超える場合は制限される', async () => {
+Deno.test('FetchAndNotifyUseCase - 処理時間予算に達した場合は打ち切られる', async () => {
   class MultipleFeedRepository implements IFeedRepository {
     fetchLatestItems(_feedUrl: string): Promise<FeedEntry[]> {
-      // 5つのアイテムを返す
       return Promise.resolve(Array.from({ length: 5 }, (_, i) => ({
         id: `test-id-${i}`,
         title: { value: `Article ${i}` },
@@ -218,10 +219,64 @@ Deno.test('FetchAndNotifyUseCase - 最大投稿数を超える場合は制限さ
   );
 
   const mockAgent = createMockAgent();
-  // 最大2件に制限
-  await useCase.execute('https://example.com/feed', mockAgent, undefined, 2);
+  // 予算0msで即座に打ち切り
+  await useCase.execute('https://example.com/feed', mockAgent, undefined, 0);
 
-  // 2件のみ処理されることを確認
-  assertEquals(notificationRepo.blueskyCallCount, 2, 'Bluesky投稿は2回のみ呼ばれるべき');
-  assertEquals(notificationRepo.webhookCallCount, 2, 'Webhook通知は2回のみ呼ばれるべき');
+  assertEquals(notificationRepo.blueskyCallCount, 0, '予算切れのためBluesky投稿は呼ばれないべき');
+  assertEquals(notificationRepo.webhookCallCount, 0, '予算切れのためWebhook通知は呼ばれないべき');
+});
+
+Deno.test('FetchAndNotifyUseCase - 古い順に処理される', async () => {
+  class OrderedFeedRepository implements IFeedRepository {
+    fetchLatestItems(_feedUrl: string): Promise<FeedEntry[]> {
+      // RssFeedClient と同様、新しい順で返す
+      return Promise.resolve([
+        {
+          id: 'newest',
+          title: { value: 'Newest' },
+          links: [{ href: 'https://example.com/article-newest' }],
+          published: new Date('2025-01-03'),
+        },
+        {
+          id: 'middle',
+          title: { value: 'Middle' },
+          links: [{ href: 'https://example.com/article-middle' }],
+          published: new Date('2025-01-02'),
+        },
+        {
+          id: 'oldest',
+          title: { value: 'Oldest' },
+          links: [{ href: 'https://example.com/article-oldest' }],
+          published: new Date('2025-01-01'),
+        },
+      ] as FeedEntry[]);
+    }
+    getLastFetchedTimestamp(): Promise<number> {
+      return Promise.resolve(0);
+    }
+    saveLastFetchedTimestamp(_timestamp: number): Promise<void> {
+      return Promise.resolve();
+    }
+  }
+
+  const feedRepo = new OrderedFeedRepository();
+  const contentRepo = new MockContentRepository();
+  const summaryService = new MockSummaryService();
+  const notificationRepo = new MockNotificationRepository();
+
+  const useCase = new FetchAndNotifyUseCase(
+    feedRepo,
+    contentRepo,
+    summaryService,
+    notificationRepo,
+  );
+
+  const mockAgent = createMockAgent();
+  await useCase.execute('https://example.com/feed', mockAgent, undefined);
+
+  assertEquals(notificationRepo.processedLinks, [
+    'https://example.com/article-oldest',
+    'https://example.com/article-middle',
+    'https://example.com/article-newest',
+  ]);
 });

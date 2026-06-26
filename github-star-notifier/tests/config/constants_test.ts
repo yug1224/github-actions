@@ -2,14 +2,14 @@
  * 定数のテスト
  */
 
-import { assertEquals } from 'jsr:@std/assert';
+import { assertEquals } from 'jsr:@std/assert@^1.0.15';
 import {
   BLUESKY_SERVICE_URL,
   GEMINI_CONFIG,
   IMAGE_CONFIG,
   MAX_FEED_ITEMS,
-  MAX_POST_COUNT,
   PATTERNS,
+  PROCESSING_TIME_BUDGET_MS,
   RETRY_CONFIG,
   USER_AGENT,
 } from '../../src/config/constants.ts';
@@ -18,9 +18,9 @@ Deno.test('BLUESKY_SERVICE_URL - 正しい値', () => {
   assertEquals(BLUESKY_SERVICE_URL, 'https://bsky.social');
 });
 
-Deno.test('MAX_POST_COUNT - 正の整数', () => {
-  assertEquals(MAX_POST_COUNT, 3);
-  assertEquals(typeof MAX_POST_COUNT, 'number');
+Deno.test('PROCESSING_TIME_BUDGET_MS - 10分（ミリ秒）', () => {
+  assertEquals(PROCESSING_TIME_BUDGET_MS, 10 * 60 * 1000);
+  assertEquals(typeof PROCESSING_TIME_BUDGET_MS, 'number');
 });
 
 Deno.test('MAX_FEED_ITEMS - 正の整数', () => {
