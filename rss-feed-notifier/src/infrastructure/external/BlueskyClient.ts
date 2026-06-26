@@ -4,9 +4,9 @@
  * Bluesky APIへの投稿機能を提供
  */
 
-import { abortable } from 'jsr:@std/async';
-import { AtpAgent, type BlobRef, RichText } from 'npm:@atproto/api';
-import type AtprotoAPI from 'npm:@atproto/api';
+import { abortable } from '@std/async';
+import { AtpAgent, type BlobRef, RichText } from '@atproto/api';
+import type AtprotoAPI from '@atproto/api';
 import { logger } from '../../utils/logger.ts';
 import { retry } from '../../utils/retry.ts';
 import { BLUESKY_LANGUAGE, RETRY_CONFIG } from '../../config/constants.ts';

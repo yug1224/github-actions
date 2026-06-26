@@ -1,7 +1,7 @@
 /**
  * エラークラスのテスト
  */
-import { assertEquals, assertInstanceOf } from 'jsr:@std/assert';
+import { assertEquals, assertInstanceOf } from '@std/assert';
 import {
   AppError,
   AuthError,

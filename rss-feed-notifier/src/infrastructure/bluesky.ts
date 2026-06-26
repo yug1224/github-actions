@@ -1,7 +1,7 @@
 /**
  * Blueskyエージェントの初期化
  */
-import { BskyAgent } from 'npm:@atproto/api';
+import { BskyAgent } from '@atproto/api';
 import { BLUESKY_SERVICE_URL } from '../config/constants.ts';
 import { logger } from '../utils/logger.ts';
 import { AuthError } from '../utils/errors.ts';

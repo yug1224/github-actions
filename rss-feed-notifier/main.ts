@@ -1,10 +1,10 @@
 /**
  * RSS Feed Notifier
  *
- * RSSフィードを監視し、新着記事をBlueskyとWebhookに自動投稿する
+ * RSSフィードを監視し、新着記事をBlueskyに自動投稿する
  */
 
-import 'jsr:@std/dotenv/load';
+import '@std/dotenv';
 import { validateAndGetEnv } from './src/config/env.ts';
 import { POST_TIME_END_HOUR_UTC, POST_TIME_START_HOUR_UTC } from './src/config/constants.ts';
 import { logger } from './src/utils/logger.ts';
@@ -49,7 +49,7 @@ async function main(): Promise<void> {
   );
 
   // 依存性の構築
-  const dependencies = createDependencies(agent, env);
+  const dependencies = createDependencies(agent);
 
   // ユースケースの実行
   const useCase = new FetchAndNotifyUseCase(
@@ -58,7 +58,6 @@ async function main(): Promise<void> {
     dependencies.openGraphRepository,
     dependencies.imageRepository,
     dependencies.blueskyPostFormatter,
-    dependencies.webhookMessageFormatter,
   );
 
   await useCase.execute(env.RSS_URL);

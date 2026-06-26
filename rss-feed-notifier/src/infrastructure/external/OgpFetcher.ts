@@ -4,9 +4,9 @@
  * WebページからOGPメタデータを取得する機能を提供
  */
 
-import { DOMParser } from 'jsr:@b-fuze/deno-dom';
-import ogs from 'npm:open-graph-scraper';
-import { extractText } from 'npm:unpdf';
+import { DOMParser } from '@b-fuze/deno-dom';
+import ogs from 'open-graph-scraper';
+import { extractText } from 'unpdf';
 import { logger } from '../../utils/logger.ts';
 import { USER_AGENT } from '../../config/constants.ts';
 

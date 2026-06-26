@@ -6,7 +6,7 @@ rss-feed-notifier/domain-rules: RSS Feed Notifier のドメインルール
 
 # プロジェクト概要
 
-RSS Feed Notifier は、RSSフィードを監視し、新着記事をBlueskyとWebhook（X連携）に自動投稿するアプリケーションです。
+RSS Feed Notifier は、RSSフィードを監視し、新着記事をBlueskyに自動投稿するアプリケーションです。
 
 # ユビキタス言語（プロジェクト固有）
 
@@ -17,19 +17,14 @@ RSS Feed Notifier は、RSSフィードを監視し、新着記事をBlueskyとW
   - プロパティ: id, title, url, publishedAt, description
   - ビジネスルール: 前回取得時刻以降の記事のみ処理対象
 
-- **Post**: SNSへの投稿内容
+- **Post**: Blueskyへの投稿内容
   - プロパティ: text, image, url
-  - ビジネスルール: 文字数制限（Bluesky: 300文字、X: 280文字）
+  - ビジネスルール: 文字数制限 300文字（`TEXT_LIMITS.BLUESKY_MAX_LENGTH`）
 
 ### Value Object
 - **Url**: URL文字列（バリデーション付き）
   - 不変
   - 自己検証（無効なURLは生成時にエラー）
-
-- **PostText**: 投稿テキスト（文字数制限付き）
-  - プロパティ: text, platform (bluesky/x)
-  - 不変
-  - プラットフォームに応じた文字数制限を検証
 
 - **OpenGraphData**: Webページのメタデータ
   - プロパティ: title, description, imageUrl
@@ -41,7 +36,7 @@ RSS Feed Notifier は、RSSフィードを監視し、新着記事をBlueskyとW
 
 ### サービス
 - **Notification**: 通知全般
-  - 種類: Webhook通知、Bluesky投稿
+  - 種類: Bluesky投稿
 
 ## 境界づけられたコンテキスト
 
@@ -57,7 +52,6 @@ rss-feed-notifier/
 │   │   ├── models/
 │   │   │   ├── FeedItem.ts         # エンティティ
 │   │   │   ├── Url.ts              # Value Object
-│   │   │   ├── PostText.ts         # Value Object
 │   │   │   ├── OpenGraphData.ts    # Value Object
 │   │   │   ├── Timestamp.ts        # Value Object
 │   │   │   └── index.ts
@@ -74,8 +68,7 @@ rss-feed-notifier/
 │   │   │   ├── FetchAndNotifyUseCase.ts
 │   │   │   └── index.ts
 │   │   └── formatters/
-│   │       ├── BlueskyPostFormatter.ts
-│   │       └── WebhookMessageFormatter.ts
+│   │       └── BlueskyPostFormatter.ts
 │   │
 │   ├── infrastructure/              # インフラストラクチャ層
 │   │   ├── repositories/
@@ -88,7 +81,6 @@ rss-feed-notifier/
 │   │   └── external/
 │   │       ├── RssFeedClient.ts
 │   │       ├── BlueskyClient.ts
-│   │       ├── WebhookClient.ts
 │   │       ├── OgpFetcher.ts
 │   │       └── ImageProcessor.ts
 │   │
@@ -148,12 +140,6 @@ rss-feed-notifier/
 - リッチテキスト: URLにリンクファセットを設定
 - 言語: 日本語 (ja)
 
-## Webhook通知（X連携）
-- テキストフォーマット:
-  - タイトルなし: `{link}`
-  - タイトル付き: `{title}\n{link}` （タイトルは100文字まで）
-- ペイロード: `{ value1: text }`
-
 # エラーハンドリング
 
 ## リトライ対象
@@ -187,7 +173,6 @@ rss-feed-notifier/
 - `RSS_URL`: 監視するRSSフィードのURL
 - `BLUESKY_IDENTIFIER`: Blueskyアカウント
 - `BLUESKY_PASSWORD`: Blueskyパスワード
-- `WEBHOOK_URL`: 通知先WebhookURL
 
 ## 機密情報の取り扱い
 - 環境変数は `config/env.ts` 経由でアクセス

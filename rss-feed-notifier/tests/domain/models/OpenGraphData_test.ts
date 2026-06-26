@@ -1,7 +1,7 @@
 /**
  * OpenGraphData Value Object のテスト
  */
-import { assertEquals } from 'jsr:@std/assert';
+import { assertEquals } from '@std/assert';
 import { OpenGraphData } from '../../../src/domain/models/OpenGraphData.ts';
 
 Deno.test('OpenGraphData.create() は有効なデータからOpenGraphDataを生成する', () => {

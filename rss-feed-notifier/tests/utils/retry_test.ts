@@ -1,7 +1,7 @@
 /**
  * リトライユーティリティのテスト
  */
-import { assertEquals, assertRejects } from 'jsr:@std/assert';
+import { assertEquals, assertRejects } from '@std/assert';
 import { retry, retryWithBackoff } from '../../src/utils/retry.ts';
 
 Deno.test('retry() は成功した場合、結果を返す', async () => {

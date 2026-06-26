@@ -4,7 +4,7 @@
  * RSSフィードの取得とパース機能を提供
  */
 
-import { parseFeed } from 'jsr:@mikaelporttila/rss';
+import { parseFeed } from '@mikaelporttila/rss';
 import { logger } from '../../utils/logger.ts';
 import { NetworkError } from '../../utils/errors.ts';
 

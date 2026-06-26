@@ -9,7 +9,6 @@ import { INotificationRepository } from '../../domain/repositories/INotification
 import { IOpenGraphRepository } from '../../domain/repositories/IOpenGraphRepository.ts';
 import { IImageRepository, type ImageData } from '../../domain/repositories/IImageRepository.ts';
 import { BlueskyPostFormatter } from '../formatters/BlueskyPostFormatter.ts';
-import { WebhookMessageFormatter } from '../formatters/WebhookMessageFormatter.ts';
 import { Url } from '../../domain/models/Url.ts';
 import { FeedItem } from '../../domain/models/FeedItem.ts';
 import { OpenGraphData } from '../../domain/models/OpenGraphData.ts';
@@ -27,7 +26,6 @@ export class FetchAndNotifyUseCase {
     private readonly openGraphRepository: IOpenGraphRepository,
     private readonly imageRepository: IImageRepository,
     private readonly blueskyPostFormatter: BlueskyPostFormatter,
-    private readonly webhookMessageFormatter: WebhookMessageFormatter,
   ) {}
 
   /**
@@ -160,9 +158,6 @@ export class FetchAndNotifyUseCase {
       // Blueskyに投稿
       await this.postToBluesky(item, ogpData, imageData);
 
-      // Webhookに通知
-      await this.notifyViaWebhook(item, ogpData);
-
       logger.info('アイテムの処理が完了しました', { id: item.getId() });
     } catch (error) {
       logger.error('アイテムの処理中にエラーが発生しました', error, {
@@ -198,13 +193,5 @@ export class FetchAndNotifyUseCase {
       description,
       image: imageData ?? undefined,
     });
-  }
-
-  /**
-   * Webhookに通知する
-   */
-  private async notifyViaWebhook(item: FeedItem, ogpData: OpenGraphData): Promise<void> {
-    const message = this.webhookMessageFormatter.formatMessage(item, ogpData);
-    await this.notificationRepository.notifyViaWebhook(message);
   }
 }

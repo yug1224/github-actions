@@ -1,7 +1,7 @@
 /**
  * Timestamp Value Object のテスト
  */
-import { assertEquals, assertThrows } from 'jsr:@std/assert';
+import { assertEquals, assertThrows } from '@std/assert';
 import { InvalidTimestampError, Timestamp } from '../../../src/domain/models/Timestamp.ts';
 
 Deno.test('Timestamp.now() は現在時刻のタイムスタンプを生成する', () => {

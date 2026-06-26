@@ -1,10 +1,10 @@
 /**
  * INotificationRepository
  *
- * 通知（BlueskyとWebhook）を抽象化するリポジトリインターフェース
+ * 通知（Bluesky）を抽象化するリポジトリインターフェース
  */
 
-import { RichText } from 'npm:@atproto/api';
+import { RichText } from '@atproto/api';
 
 /**
  * Bluesky投稿データ
@@ -30,11 +30,4 @@ export interface INotificationRepository {
    * @param postData - 投稿データ
    */
   postToBluesky(postData: BlueskyPostData): Promise<void>;
-
-  /**
-   * Webhookに通知する
-   *
-   * @param text - 通知テキスト
-   */
-  notifyViaWebhook(text: string): Promise<void>;
 }

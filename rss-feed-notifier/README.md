@@ -1,13 +1,12 @@
 # RSS Feed Notifier
 
-RSSフィードを監視し、新着記事を Bluesky と Webhook（X連携）に自動投稿するアプリケーションです。
+RSSフィードを監視し、新着記事を Bluesky に自動投稿するアプリケーションです。
 
 ## 機能
 
 - RSSフィードの定期監視
 - 新着記事の自動検出
 - Bluesky への自動投稿（OGP画像付き）
-- Webhook 経由での通知（X連携など）
 - 投稿時間制御（UTC 1:00-15:00 のみ投稿）
 - 未投稿記事の自動リトライ
 
@@ -51,9 +50,6 @@ RSS_URL=https://example.com/feed.xml
 # Bluesky 認証情報（必須）
 BLUESKY_IDENTIFIER=your-handle.bsky.social
 BLUESKY_PASSWORD=your-app-password
-
-# Webhook URL（任意：X連携など）
-WEBHOOK_URL=https://maker.ifttt.com/trigger/...
 ```
 
 ### インストール
