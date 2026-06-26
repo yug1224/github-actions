@@ -4,7 +4,7 @@
  * Bluesky投稿用のテキストとRichTextを生成
  */
 
-import { AtpAgent, RichText } from 'npm:@atproto/api';
+import { AtpAgent, RichText } from '@atproto/api';
 import { FeedItem } from '../../domain/models/FeedItem.ts';
 import { OpenGraphData } from '../../domain/models/OpenGraphData.ts';
 import { TEXT_LIMITS } from '../../config/constants.ts';

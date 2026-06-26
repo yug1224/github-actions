@@ -1,7 +1,7 @@
 /**
  * Url Value Object のテスト
  */
-import { assertEquals, assertThrows } from 'jsr:@std/assert';
+import { assertEquals, assertThrows } from '@std/assert';
 import { InvalidUrlError, Url } from '../../../src/domain/models/Url.ts';
 
 Deno.test('Url.create() は有効なURLからUrlを生成する', () => {

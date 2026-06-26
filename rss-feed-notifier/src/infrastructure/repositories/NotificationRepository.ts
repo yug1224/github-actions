@@ -1,7 +1,7 @@
 /**
  * NotificationRepository実装
  *
- * Bluesky投稿とWebhook通知を管理
+ * Bluesky投稿を管理
  */
 
 import {
@@ -9,7 +9,6 @@ import {
   INotificationRepository,
 } from '../../domain/repositories/INotificationRepository.ts';
 import { BlueskyClient } from '../external/BlueskyClient.ts';
-import { WebhookClient } from '../external/WebhookClient.ts';
 import { logger } from '../../utils/logger.ts';
 
 /**
@@ -18,7 +17,6 @@ import { logger } from '../../utils/logger.ts';
 export class NotificationRepository implements INotificationRepository {
   constructor(
     private readonly blueskyClient: BlueskyClient,
-    private readonly webhookClient?: WebhookClient,
   ) {}
 
   /**
@@ -39,21 +37,5 @@ export class NotificationRepository implements INotificationRepository {
     });
 
     logger.info('Blueskyへの投稿が完了しました');
-  }
-
-  /**
-   * Webhookに通知する
-   */
-  async notifyViaWebhook(text: string): Promise<void> {
-    if (!this.webhookClient) {
-      logger.info('Webhook URLが設定されていないため、通知をスキップします');
-      return;
-    }
-
-    logger.info('Webhookに通知します', { textLength: text.length });
-
-    await this.webhookClient.send(text);
-
-    logger.info('Webhookへの通知が完了しました');
   }
 }

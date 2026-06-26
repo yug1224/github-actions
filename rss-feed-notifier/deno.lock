@@ -2,18 +2,28 @@
   "version": "5",
   "specifiers": {
     "jsr:@b-fuze/deno-dom@*": "0.1.49",
+    "jsr:@b-fuze/deno-dom@~0.1.49": "0.1.49",
     "jsr:@maxim-mazurok/sax-ts@1.2.13": "1.2.13",
     "jsr:@mikaelporttila/rss@*": "1.1.2",
+    "jsr:@mikaelporttila/rss@^1.1.2": "1.1.2",
     "jsr:@std/assert@*": "1.0.15",
+    "jsr:@std/assert@1.0.15": "1.0.15",
+    "jsr:@std/assert@^1.0.15": "1.0.15",
     "jsr:@std/async@*": "1.0.13",
+    "jsr:@std/async@^1.0.13": "1.0.13",
     "jsr:@std/dotenv@*": "0.225.5",
+    "jsr:@std/dotenv@~0.225.5": "0.225.5",
     "jsr:@std/internal@^1.0.12": "1.0.12",
     "jsr:@std/path@*": "1.1.0",
+    "jsr:@std/path@^1.1.0": "1.1.0",
     "npm:@atproto/api@*": "0.15.16",
+    "npm:@atproto/api@~0.15.16": "0.15.16",
     "npm:@imagemagick/magick-wasm@0.0.31": "0.0.31",
     "npm:graphemer@*": "1.4.0",
     "npm:open-graph-scraper@*": "6.10.0",
-    "npm:unpdf@*": "1.0.6"
+    "npm:open-graph-scraper@^6.10.0": "6.10.0",
+    "npm:unpdf@*": "1.0.6",
+    "npm:unpdf@^1.0.6": "1.0.6"
   },
   "jsr": {
     "@b-fuze/deno-dom@0.1.49": {
@@ -264,7 +274,8 @@
       "integrity": "sha512-6qN4hJdMwfYBtE3YBTTHhoeuUrDBPZmbQaxWAqSALV/MeEnR5z1xd8UKud2RAkFoPkmB+hli1TZSnyi84xz1vQ==",
       "dependencies": [
         "iconv-lite"
-      ]
+      ],
+      "deprecated": true
     },
     "whatwg-mimetype@4.0.0": {
       "integrity": "sha512-QaKxh0eNIi2mE9p2vEdzfagOKHCcj1pJ56EEHGQOVxp8r9/iszLUUV7v89x9O1p/T+NlTM5W7jW6+cz4Fq1YVg=="
@@ -275,5 +286,18 @@
   },
   "remote": {
     "https://deno.land/x/imagemagick_deno@0.0.31/mod.ts": "124d7f045429f6e6c486b86e72d025410d09576bc0d8075e69f97118a1a33413"
+  },
+  "workspace": {
+    "dependencies": [
+      "jsr:@b-fuze/deno-dom@~0.1.49",
+      "jsr:@mikaelporttila/rss@^1.1.2",
+      "jsr:@std/assert@^1.0.15",
+      "jsr:@std/async@^1.0.13",
+      "jsr:@std/dotenv@~0.225.5",
+      "jsr:@std/path@^1.1.0",
+      "npm:@atproto/api@~0.15.16",
+      "npm:open-graph-scraper@^6.10.0",
+      "npm:unpdf@^1.0.6"
+    ]
   }
 }

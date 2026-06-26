@@ -1,7 +1,7 @@
 /**
  * FeedItem Entity のテスト
  */
-import { assertEquals } from 'jsr:@std/assert';
+import { assertEquals } from '@std/assert';
 import { FeedItem } from '../../../src/domain/models/FeedItem.ts';
 
 Deno.test('FeedItem.create() はフィードアイテムを生成する', () => {

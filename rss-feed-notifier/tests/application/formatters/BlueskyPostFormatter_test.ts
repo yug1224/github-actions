@@ -3,7 +3,7 @@
  *
  * 注: BskyAgentのモックが必要なため、基本的な動作のみをテスト
  */
-import { assertEquals } from 'jsr:@std/assert';
+import { assertEquals } from '@std/assert';
 
 Deno.test('BlueskyPostFormatter の基本テスト（プレースホルダー）', () => {
   // BlueskyPostFormatterはBskyAgentに依存しているため、
@@ -13,7 +13,6 @@ Deno.test('BlueskyPostFormatter の基本テスト（プレースホルダー）
 });
 
 // TODO: BskyAgentのモックを使った実際のテストを追加
-// - formatPost() のテスト
 // - createRichText() のテスト
-// - generatePostText() のテスト
-// - truncateText() のテスト
+// - getDescription() のテスト
+// - formatLinkText / formatTitle の切り詰めは createRichText 経由で検証
