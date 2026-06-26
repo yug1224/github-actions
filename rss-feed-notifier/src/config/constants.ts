@@ -7,9 +7,8 @@ export const BLUESKY_SERVICE_URL = 'https://bsky.social';
 export const BLUESKY_LANGUAGE = 'ja';
 
 // 投稿設定
-export const MAX_POST_COUNT = 3; // 1回の実行で投稿する最大数
-export const POST_TIME_START_HOUR_UTC = 1; // 投稿可能時間帯の開始（UTC）
-export const POST_TIME_END_HOUR_UTC = 15; // 投稿可能時間帯の終了（UTC）
+/** 1回の実行で投稿処理に使う時間予算（ミリ秒）。ジョブ timeout 15分に対しセットアップ・in-flight 余裕を確保 */
+export const PROCESSING_TIME_BUDGET_MS = 10 * 60 * 1000;
 
 // テキスト制限
 export const TEXT_LIMITS = {

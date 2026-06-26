@@ -164,7 +164,7 @@ github-star-notifier/
 
 ```typescript
 // 投稿設定
-export const MAX_POST_COUNT = 3; // 1回の実行で投稿する最大数
+export const PROCESSING_TIME_BUDGET_MS = 10 * 60 * 1000; // 1回の実行で投稿処理に使う時間予算
 export const MAX_FEED_ITEMS = 20; // RSSから取得する最大アイテム数
 
 // 画像設定
@@ -211,37 +211,54 @@ echo "0" > data/.timestamp
 
 ## GitHub Actions での使用
 
-`.github/workflows/star-notifier.yml`の例：
+`.github/workflows/github-star-notifier.yml` の例：
 
 ```yaml
 name: GitHub Star Notifier
 
 on:
   schedule:
-    - cron: '0 */6 * * *' # 6時間ごとに実行
-  workflow_dispatch: # 手動実行も可能
+    - cron: '0/15 * * * *' # 15分ごとに実行
+  workflow_dispatch:
 
 jobs:
-  notify:
-    runs-on: ubuntu-latest
+  github-star-notifier:
+    runs-on: macos-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: github-star-notifier
     steps:
       - uses: actions/checkout@v4
 
-      - uses: denoland/setup-deno@v1
+      - uses: denoland/setup-deno@v2
         with:
-          deno-version: v1.x
+          deno-version: v2.x
+
+      - name: Create directories
+        run: mkdir -p data temp
+
+      - name: Restore timestamp cache
+        uses: actions/cache/restore@v4
+        with:
+          path: github-star-notifier/data/.timestamp
+          key: github-star-notifier-timestamp-${{ github.run_id }}
+          restore-keys: github-star-notifier-timestamp-
+
+      - name: Install dotenvx
+        run: curl -sfS https://dotenvx.sh/install.sh | sh
 
       - name: Run notifier
+        run: dotenvx run -- deno run -A main.ts
         env:
-          BLUESKY_IDENTIFIER: ${{ secrets.BLUESKY_IDENTIFIER }}
-          BLUESKY_PASSWORD: ${{ secrets.BLUESKY_PASSWORD }}
-          GOOGLE_AI_API_KEY: ${{ secrets.GOOGLE_AI_API_KEY }}
-          GEMINI_MODEL: gemini-2.0-flash-lite
-          RSS_URL: ${{ secrets.RSS_URL }}
-          WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
-        run: |
-          cd github-star-notifier
-          deno run --allow-env --allow-net --allow-read --allow-write main.ts
+          DOTENV_PRIVATE_KEY: ${{ secrets.DOTENV_PRIVATE_KEY_GITHUB_STAR_NOTIFIER }}
+
+      - name: Save timestamp cache
+        uses: actions/cache/save@v4
+        if: always()
+        with:
+          path: github-star-notifier/data/.timestamp
+          key: github-star-notifier-timestamp-${{ github.run_id }}
 ```
 
 ## 貢献

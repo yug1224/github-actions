@@ -17,6 +17,7 @@ import type { FeedItem } from '../../types/index.ts';
 import formatBlueskyPost from '../formatters/BlueskyPostFormatter.ts';
 import formatWebhookMessage from '../formatters/WebhookMessageFormatter.ts';
 import processImage from '../../infrastructure/external/ImageProcessor.ts';
+import { PROCESSING_TIME_BUDGET_MS } from '../../config/constants.ts';
 import { logger } from '../../utils/logger.ts';
 
 /**
@@ -36,13 +37,13 @@ export class FetchAndNotifyUseCase {
    * @param feedUrl - フィードのURL
    * @param agent - Blueskyエージェント
    * @param webhookUrl - Webhook URL
-   * @param maxPostCount - 最大投稿数
+   * @param processingTimeBudgetMs - 投稿処理に使う時間予算（ミリ秒）
    */
   async execute(
     feedUrl: string,
     agent: AtpAgent,
     webhookUrl: string | undefined,
-    maxPostCount: number,
+    processingTimeBudgetMs: number = PROCESSING_TIME_BUDGET_MS,
   ): Promise<void> {
     // フィードから記事リストを取得
     const itemList = await this.feedRepo.fetchLatestItems(feedUrl);
@@ -53,20 +54,26 @@ export class FetchAndNotifyUseCase {
       return;
     }
 
+    const processingDeadline = Date.now() + processingTimeBudgetMs;
+    // 新しい順で取得されるため、古い順に処理して予算打ち切り時の取りこぼしを防ぐ
+    const itemsToProcess = [...itemList].reverse();
+
     // 取得した記事リストをループ処理
-    let postCount = 0;
-    for (const item of itemList) {
-      // 投稿回数をカウントし、上限以上投稿したら終了
-      postCount++;
-      if (postCount > maxPostCount) {
-        logger.info('Post count limit reached', { limit: maxPostCount });
+    let processedCount = 0;
+    for (const item of itemsToProcess) {
+      if (Date.now() >= processingDeadline) {
+        logger.info('処理時間予算に達しました', {
+          processedCount,
+          remainingCount: itemsToProcess.length - processedCount,
+        });
         break;
       }
 
       await this.processItem(item, agent, webhookUrl);
+      processedCount++;
     }
 
-    logger.info('Processed items', { count: postCount });
+    logger.info('処理が完了しました', { count: processedCount });
   }
 
   /**
@@ -85,10 +92,7 @@ export class FetchAndNotifyUseCase {
     }
 
     const link = linkUrl.toString();
-
-    // タイムスタンプ更新
     const timestamp = item.published ? new Date(item.published).getTime() : new Date().getTime();
-    await this.feedRepo.saveLastFetchedTimestamp(timestamp);
 
     // OGP取得と記事本文抽出を並列実行
     const [openGraphData, summaryObj] = await Promise.all([
@@ -129,6 +133,8 @@ export class FetchAndNotifyUseCase {
       }),
       this.notificationRepo.sendWebhookNotification(webhookMessage, webhookUrl),
     ]);
+
+    await this.feedRepo.saveLastFetchedTimestamp(timestamp);
 
     logger.info('Successfully processed item', { link });
   }

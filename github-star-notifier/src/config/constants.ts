@@ -6,7 +6,8 @@
 export const BLUESKY_SERVICE_URL = 'https://bsky.social';
 
 // 投稿設定
-export const MAX_POST_COUNT = 3;
+/** 1回の実行で投稿処理に使う時間予算（ミリ秒）。ジョブ timeout 15分に対しセットアップ・in-flight 余裕を確保 */
+export const PROCESSING_TIME_BUDGET_MS = 10 * 60 * 1000;
 export const MAX_FEED_ITEMS = 20;
 
 // 画像設定
