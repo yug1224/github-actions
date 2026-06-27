@@ -56,11 +56,3 @@ export interface PublishToBlueskyParams {
   mimeType?: string;
   image?: Uint8Array;
 }
-
-// Blob upload結果
-export interface UploadBlobResult {
-  $type: 'blob';
-  ref: { $link: string };
-  mimeType: string;
-  size: number;
-}

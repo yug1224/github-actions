@@ -1,12 +1,13 @@
 import { abortable } from '../../utils/abortable.ts';
 import * as AtprotoAPI from '@atproto/api';
-import type { PublishToBlueskyParams, UploadBlobResult } from '../../types/index.ts';
+import type { BlobRef } from '@atproto/api';
+import type { PublishToBlueskyParams } from '../../types/index.ts';
 import { RETRY_CONFIG } from '../../config/constants.ts';
 import { retry } from '../../utils/retry.ts';
 import { logger } from '../../utils/logger.ts';
 
 export default async ({ agent, richText, title, link, mimeType, image }: PublishToBlueskyParams): Promise<void> => {
-  const thumb = await (async (): Promise<UploadBlobResult | undefined> => {
+  const thumb = await (async (): Promise<BlobRef | undefined> => {
     if (!(image instanceof Uint8Array && typeof mimeType === 'string')) return;
     logger.debug('Uploading image', {
       imageByteLength: image.byteLength,
@@ -37,15 +38,7 @@ export default async ({ agent, richText, title, link, mimeType, image }: Publish
               size: uploadedImage.data.blob.size,
             });
 
-            // 投稿オブジェクトに画像を追加
-            return {
-              $type: 'blob' as const,
-              ref: {
-                $link: uploadedImage.data.blob.ref.toString(),
-              },
-              mimeType: uploadedImage.data.blob.mimeType,
-              size: uploadedImage.data.blob.size,
-            };
+            return uploadedImage.data.blob;
           } finally {
             clearTimeout(timeoutId);
           }
@@ -74,7 +67,7 @@ export default async ({ agent, richText, title, link, mimeType, image }: Publish
             uri: link,
             title,
             description: '',
-            thumb: thumb as unknown as AtprotoAPI.AppBskyEmbedExternal.External['thumb'],
+            thumb,
           },
         }
       : {

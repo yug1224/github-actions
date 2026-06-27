@@ -14,12 +14,13 @@ const parser = new Parser();
 /**
  * rss-parser のアイテムを FeedEntry 形式に変換する
  */
-function mapItemToFeedEntry(item: Item): FeedEntry {
+export function mapItemToFeedEntry(item: Item): FeedEntry {
+  const dateStr = item.pubDate ?? item.isoDate;
   return {
     id: item.guid || item.link,
     title: item.title ? { value: item.title } : undefined,
     links: item.link ? [{ href: item.link }] : [],
-    published: item.pubDate ? new Date(item.pubDate) : undefined,
+    published: dateStr ? new Date(dateStr) : undefined,
     description: item.content
       ? { value: item.content }
       : item.contentSnippet
