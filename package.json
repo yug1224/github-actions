@@ -11,10 +11,12 @@
     "typecheck": "tsc --noEmit -p github-star-notifier/tsconfig.json && tsc --noEmit -p rss-feed-notifier/tsconfig.json && tsc --noEmit -p link-insight-notifier/tsconfig.json"
   },
   "devDependencies": {
-    "@types/node": "^22.15.0",
-    "typescript": "npm:typescript@rc",
-    "vite-node": "^3.2.4",
-    "vite-plus": "^0.2.1"
+    "@types/jsdom": "^28.0.3",
+    "@types/node": "^26.0.1",
+    "typescript": "7.0.1-rc",
+    "vite-node": "^6.0.0",
+    "vite-plus": "^0.2.1",
+    "vitest": "^4.1.9"
   },
   "packageManager": "pnpm@11.9.0"
 }

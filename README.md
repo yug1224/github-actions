@@ -39,10 +39,10 @@ pnpm run typecheck  # tsc --noEmit
 
 [`.github/dependabot.yml`](.github/dependabot.yml) により、以下を Dependabot が監視します。
 
-| 対象 | ecosystem |
-| ---- | --------- |
+| 対象                                   | ecosystem        |
+| -------------------------------------- | ---------------- |
 | GitHub Actions（`.github/workflows/`） | `github-actions` |
-| npm パッケージ（pnpm モノレポ） | `npm` |
+| npm パッケージ（pnpm モノレポ）        | `npm`            |
 
 - **スケジュール**: 毎週
 - **cooldown**: 7 日（version updates のみ。セキュリティ更新 PR は猶予なし）
