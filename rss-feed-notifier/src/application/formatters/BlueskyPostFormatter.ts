@@ -10,6 +10,33 @@ import { OpenGraphData } from '../../domain/models/OpenGraphData.ts';
 import { TEXT_LIMITS } from '../../config/constants.ts';
 import { logger } from '../../utils/logger.ts';
 
+/** detectFacets が生成するファセットの最小型 */
+type AutoDetectedFacet = NonNullable<RichText['facets']>[number];
+
+/**
+ * detectFacets で自動検出されたファセットから有効なものだけを残す
+ *
+ * - DID 解決に失敗したメンション（did が空）は除外
+ * - リンクファセットは手動追加するため自動検出分は除外
+ */
+export function filterValidAutoDetectedFacets(
+  facets: AutoDetectedFacet[],
+): AutoDetectedFacet[] {
+  return facets.filter((facet) =>
+    facet.features.every((feature) => {
+      if (feature.$type === 'app.bsky.richtext.facet#mention') {
+        return 'did' in feature &&
+          typeof feature.did === 'string' &&
+          feature.did.length > 0;
+      }
+      if (feature.$type === 'app.bsky.richtext.facet#link') {
+        return false;
+      }
+      return true;
+    })
+  );
+}
+
 /**
  * 文字列の書記素クラスタ数をカウントする
  */
@@ -62,6 +89,8 @@ export class BlueskyPostFormatter {
     const richText = new RichText({ text: postBodyText });
     await richText.detectFacets(this.agent);
 
+    const autoDetectedFacets = filterValidAutoDetectedFacets(richText.facets ?? []);
+
     // リンクファセットを先頭に追加
     richText.facets = [
       {
@@ -76,7 +105,7 @@ export class BlueskyPostFormatter {
           },
         ],
       },
-      ...(richText.facets || []),
+      ...autoDetectedFacets,
     ];
 
     return richText;
