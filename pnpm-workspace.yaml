@@ -3,6 +3,10 @@ packages:
   - 'rss-feed-notifier'
   - 'link-insight-notifier'
 
+overrides:
+  vite: npm:@voidzero-dev/vite-plus-core@0.2.1
+  vitest: 4.1.9
+
 allowBuilds:
   '@google/genai': true
   esbuild: true
