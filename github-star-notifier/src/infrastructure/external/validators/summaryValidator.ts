@@ -19,9 +19,7 @@ export interface ValidationResult {
 /**
  * カテゴリ別の文末パターンをフラットな配列に変換する
  */
-export function flattenEndingPatterns(
-  categories: Record<string, readonly string[]>,
-): string[] {
+export function flattenEndingPatterns(categories: Record<string, readonly string[]>): string[] {
   return Object.values(categories).flat();
 }
 
@@ -51,9 +49,7 @@ export function validateSummaryFormat(text: string): ValidationResult {
   const segmenter = new Intl.Segmenter('ja', { granularity: 'grapheme' });
   const charCount = [...segmenter.segment(text)].length;
   if (charCount > SUMMARY_RULES.MAX_LENGTH) {
-    errors.push(
-      `${SUMMARY_RULES.MAX_LENGTH}文字以内である必要があります（現在: ${charCount}文字）`,
-    );
+    errors.push(`${SUMMARY_RULES.MAX_LENGTH}文字以内である必要があります（現在: ${charCount}文字）`);
   }
 
   const firstEndings = flattenEndingPatterns(SUMMARY_RULES.FIRST_SENTENCE_ENDINGS);

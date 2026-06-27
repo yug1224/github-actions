@@ -9,7 +9,7 @@ import { OpenGraphData } from '../../domain/models/OpenGraphData.ts';
 import { Url } from '../../domain/models/Url.ts';
 import { OgpFetcher } from '../external/OgpFetcher.ts';
 import { logger } from '../../utils/logger.ts';
-import * as path from '@std/path';
+import * as path from 'node:path';
 
 /**
  * Open Graphリポジトリ実装

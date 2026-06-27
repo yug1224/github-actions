@@ -1,0 +1,27 @@
+{
+  "name": "link-insight-notifier",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "vite-node main.ts",
+    "check": "pnpm --dir .. run check",
+    "check:fix": "pnpm --dir .. run check:fix",
+    "typecheck": "pnpm --dir .. exec tsc --noEmit -p link-insight-notifier/tsconfig.json"
+  },
+  "dependencies": {
+    "@atproto/api": "^0.20.22",
+    "@google/generative-ai": "^0.24.1",
+    "@mozilla/readability": "^0.6.0",
+    "dotenv": "^16.5.0",
+    "jsdom": "^29.1.1",
+    "open-graph-scraper": "^6.12.0",
+    "puppeteer-core": "^24.10.0",
+    "sharp": "^0.34.2",
+    "unpdf": "^1.6.2"
+  },
+  "devDependencies": {
+    "@types/jsdom": "^21.1.7",
+    "@types/node": "^22.12.0"
+  }
+}

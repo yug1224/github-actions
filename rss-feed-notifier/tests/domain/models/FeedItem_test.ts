@@ -1,10 +1,10 @@
 /**
  * FeedItem Entity のテスト
  */
-import { assertEquals } from '@std/assert';
+import { expect, test } from 'vitest';
 import { FeedItem } from '../../../src/domain/models/FeedItem.ts';
 
-Deno.test('FeedItem.create() はフィードアイテムを生成する', () => {
+test('FeedItem.create() はフィードアイテムを生成する', () => {
   const publishedAt = new Date('2024-01-01T00:00:00Z');
 
   const item = FeedItem.create({
@@ -15,14 +15,14 @@ Deno.test('FeedItem.create() はフィードアイテムを生成する', () => 
     description: '記事の説明文',
   });
 
-  assertEquals(item.getId(), 'item-123');
-  assertEquals(item.getTitle(), 'テスト記事');
-  assertEquals(item.getUrl().toString(), 'https://example.com/article');
-  assertEquals(item.getPublishedAt().toDate().getTime(), publishedAt.getTime());
-  assertEquals(item.getDescription(), '記事の説明文');
+  expect(item.getId()).toBe('item-123');
+  expect(item.getTitle()).toBe('テスト記事');
+  expect(item.getUrl().toString()).toBe('https://example.com/article');
+  expect(item.getPublishedAt().toDate().getTime()).toBe(publishedAt.getTime());
+  expect(item.getDescription()).toBe('記事の説明文');
 });
 
-Deno.test('FeedItem.equals() は同じIDの場合trueを返す', () => {
+test('FeedItem.equals() は同じIDの場合trueを返す', () => {
   const publishedAt = new Date('2024-01-01T00:00:00Z');
 
   const item1 = FeedItem.create({
@@ -41,10 +41,10 @@ Deno.test('FeedItem.equals() は同じIDの場合trueを返す', () => {
     description: '',
   });
 
-  assertEquals(item1.equals(item2), true);
+  expect(item1.equals(item2)).toBe(true);
 });
 
-Deno.test('FeedItem.equals() は異なるIDの場合falseを返す', () => {
+test('FeedItem.equals() は異なるIDの場合falseを返す', () => {
   const publishedAt = new Date('2024-01-01T00:00:00Z');
 
   const item1 = FeedItem.create({
@@ -63,5 +63,5 @@ Deno.test('FeedItem.equals() は異なるIDの場合falseを返す', () => {
     description: '',
   });
 
-  assertEquals(item1.equals(item2), false);
+  expect(item1.equals(item2)).toBe(false);
 });

@@ -4,7 +4,7 @@
  * Bluesky APIへの投稿機能を提供
  */
 
-import { abortable } from '@std/async';
+import { abortable } from '../../utils/abortable.ts';
 import * as AtprotoAPI from '@atproto/api';
 import { AtpAgent, type BlobRef, RichText } from '@atproto/api';
 import { logger } from '../../utils/logger.ts';
@@ -39,10 +39,7 @@ export class BlueskyClient {
    * @returns アップロードされた画像のBlobRef
    * @throws {UploadError} アップロードエラーの場合
    */
-  private async uploadImage(
-    imageData: Uint8Array,
-    mimeType: string,
-  ): Promise<BlobRef> {
+  private async uploadImage(imageData: Uint8Array, mimeType: string): Promise<BlobRef> {
     return await retry(
       async () => {
         const controller = new AbortController();
@@ -98,23 +95,21 @@ export class BlueskyClient {
       : undefined;
 
     // 投稿オブジェクトを作成
-    const postObj:
-      & Partial<AtprotoAPI.AppBskyFeedPost.Record>
-      & Omit<AtprotoAPI.AppBskyFeedPost.Record, 'createdAt'> = {
-        $type: 'app.bsky.feed.post',
-        text: params.richText.text,
-        facets: params.richText.facets,
-        embed: {
-          $type: 'app.bsky.embed.external',
-          external: {
-            uri: params.url,
-            title: params.title,
-            description: '', // 一時的にdescriptionは空にする
-            thumb,
-          },
+    const postObj: Partial<AtprotoAPI.AppBskyFeedPost.Record> & Omit<AtprotoAPI.AppBskyFeedPost.Record, 'createdAt'> = {
+      $type: 'app.bsky.feed.post',
+      text: params.richText.text,
+      facets: params.richText.facets,
+      embed: {
+        $type: 'app.bsky.embed.external',
+        external: {
+          uri: params.url,
+          title: params.title,
+          description: '', // 一時的にdescriptionは空にする
+          thumb,
         },
-        langs: [BLUESKY_LANGUAGE],
-      };
+      },
+      langs: [BLUESKY_LANGUAGE],
+    };
 
     logger.debug('投稿オブジェクト', { postObj });
 

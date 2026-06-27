@@ -4,10 +4,7 @@
  * Bluesky投稿を管理
  */
 
-import {
-  BlueskyPostData,
-  INotificationRepository,
-} from '../../domain/repositories/INotificationRepository.ts';
+import { BlueskyPostData, INotificationRepository } from '../../domain/repositories/INotificationRepository.ts';
 import { BlueskyClient } from '../external/BlueskyClient.ts';
 import { logger } from '../../utils/logger.ts';
 
@@ -15,9 +12,7 @@ import { logger } from '../../utils/logger.ts';
  * 通知リポジトリ実装
  */
 export class NotificationRepository implements INotificationRepository {
-  constructor(
-    private readonly blueskyClient: BlueskyClient,
-  ) {}
+  constructor(private readonly blueskyClient: BlueskyClient) {}
 
   /**
    * Blueskyに投稿する

@@ -4,7 +4,7 @@
  * RSSフィードを監視し、新着記事をBlueskyに自動投稿する
  */
 
-import '@std/dotenv';
+import 'dotenv/config';
 import { validateAndGetEnv } from './src/config/env.ts';
 import { logger } from './src/utils/logger.ts';
 import { initializeBlueskyAgent } from './src/infrastructure/bluesky.ts';
@@ -21,10 +21,7 @@ async function main(): Promise<void> {
   const env = validateAndGetEnv();
 
   // Blueskyにログイン
-  const agent = await initializeBlueskyAgent(
-    env.BLUESKY_IDENTIFIER,
-    env.BLUESKY_PASSWORD,
-  );
+  const agent = await initializeBlueskyAgent(env.BLUESKY_IDENTIFIER, env.BLUESKY_PASSWORD);
 
   // 依存性の構築
   const dependencies = createDependencies(agent);
@@ -46,8 +43,8 @@ async function main(): Promise<void> {
 // エントリーポイント
 try {
   await main();
-  Deno.exit(0);
+  process.exit(0);
 } catch (error: unknown) {
   logger.error('メイン処理でエラーが発生しました', error);
-  Deno.exit(1);
+  process.exit(1);
 }

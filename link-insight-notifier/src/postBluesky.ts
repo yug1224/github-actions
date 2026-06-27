@@ -1,12 +1,13 @@
-import { abortable } from 'jsr:@std/async';
-import AtprotoAPI, { AtpAgent, type BlobRef, RichText } from 'npm:@atproto/api';
+import { abortable } from './utils/abortable.ts';
+import * as AtprotoAPI from '@atproto/api';
+import { AtpAgent, type BlobRef, RichText } from '@atproto/api';
 
 export default async ({
   agent,
   rt,
   title,
   link,
-  description,
+  description: _description,
   mimeType,
   image,
 }: {
@@ -20,22 +21,19 @@ export default async ({
 }) => {
   const thumb: BlobRef | undefined = await (async () => {
     if (!(image instanceof Uint8Array && typeof mimeType === 'string')) return;
-    console.log(
-      JSON.stringify(
-        { imageByteLength: image.byteLength, encoding: mimeType },
-        null,
-        2,
-      ),
-    );
+    console.log(JSON.stringify({ imageByteLength: image.byteLength, encoding: mimeType }, null, 2));
 
     const uploadRetry = async (retryCount = 0): Promise<BlobRef | undefined> => {
       try {
         const c = new AbortController();
         // 10秒でタイムアウト
-        const timer = setTimeout(() => {
-          console.log('timeout to upload image');
-          return c.abort();
-        }, 1000 * 10 * (retryCount + 1));
+        const timer = setTimeout(
+          () => {
+            console.log('timeout to upload image');
+            return c.abort();
+          },
+          1000 * 10 * (retryCount + 1),
+        );
 
         // 画像をアップロード
         const uploadedImage = await abortable(
@@ -65,23 +63,21 @@ export default async ({
     return await uploadRetry();
   })();
 
-  const postObj:
-    & Partial<AtprotoAPI.AppBskyFeedPost.Record>
-    & Omit<AtprotoAPI.AppBskyFeedPost.Record, 'createdAt'> = {
-      $type: 'app.bsky.feed.post',
-      text: rt.text,
-      facets: rt.facets,
-      embed: {
-        $type: 'app.bsky.embed.external',
-        external: {
-          uri: link,
-          title,
-          description: '', // 一時的にdescriptionは空にする
-          thumb,
-        },
+  const postObj: Partial<AtprotoAPI.AppBskyFeedPost.Record> & Omit<AtprotoAPI.AppBskyFeedPost.Record, 'createdAt'> = {
+    $type: 'app.bsky.feed.post',
+    text: rt.text,
+    facets: rt.facets,
+    embed: {
+      $type: 'app.bsky.embed.external',
+      external: {
+        uri: link,
+        title,
+        description: '', // 一時的にdescriptionは空にする
+        thumb,
       },
-      langs: ['ja'],
-    };
+    },
+    langs: ['ja'],
+  };
 
   console.log('postObj', JSON.stringify(postObj, null, 2));
   await agent.post(postObj);

@@ -25,8 +25,5 @@ export interface IImageRepository {
    * @param timestamp - タイムスタンプ（ファイル名に使用）
    * @returns 画像データ（取得失敗時はnull）
    */
-  fetchAndResize(
-    imageUrl: Url,
-    timestamp: number,
-  ): Promise<ImageData | null>;
+  fetchAndResize(imageUrl: Url, timestamp: number): Promise<ImageData | null>;
 }

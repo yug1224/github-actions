@@ -1,16 +1,10 @@
 {
   "[typescript]": {
-    "editor.defaultFormatter": "denoland.vscode-deno"
+    "editor.defaultFormatter": "oxc.oxc-vscode"
   },
   "[javascript]": {
-    "editor.defaultFormatter": "denoland.vscode-deno"
+    "editor.defaultFormatter": "oxc.oxc-vscode"
   },
   "cSpell.words": ["atproto", "bluesky", "bsky", "Graphemer", "Twitterbot"],
-  "deno.enable": true,
-  "deno.enablePaths": [
-    "./github-star-notifier",
-    "./link-insight-notifier",
-    "./rss-feed-notifier"
-  ],
-  "deno.lint": true
+  "deno.enable": false
 }

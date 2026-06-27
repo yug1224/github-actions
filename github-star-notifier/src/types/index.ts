@@ -2,7 +2,7 @@
  * アプリケーション全体で使用する型定義
  */
 
-import { type FeedEntry } from '@mikaelporttila/rss';
+import { type FeedEntry } from './feedEntry.ts';
 import { type AtpAgent, type RichText } from '@atproto/api';
 
 // Feed関連の型

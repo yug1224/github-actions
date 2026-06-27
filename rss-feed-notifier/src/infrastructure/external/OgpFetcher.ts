@@ -4,7 +4,7 @@
  * WebページからOGPメタデータを取得する機能を提供
  */
 
-import { DOMParser } from '@b-fuze/deno-dom';
+import { JSDOM } from 'jsdom';
 import ogs from 'open-graph-scraper';
 import { extractText } from 'unpdf';
 import { logger } from '../../utils/logger.ts';
@@ -109,11 +109,7 @@ export class OgpFetcher {
   private decodeHtml(arrayBuffer: ArrayBuffer): string {
     // まずUTF-8でデコードしてみる
     let html = new TextDecoder('utf-8').decode(arrayBuffer);
-    const doc = new DOMParser().parseFromString(html, 'text/html');
-
-    if (!doc) {
-      return html;
-    }
+    const doc = this.parseHtml(html);
 
     // meta タグから文字コードを検出
     const charset = this.detectCharset(doc);
@@ -123,7 +119,7 @@ export class OgpFetcher {
       try {
         html = new TextDecoder(charset).decode(arrayBuffer);
         logger.debug('HTMLを再デコードしました', { charset });
-      } catch (_error) {
+      } catch {
         logger.warn('文字コードでのデコードに失敗しました', { charset });
       }
     }
@@ -132,18 +128,23 @@ export class OgpFetcher {
   }
 
   /**
+   * HTML文字列をDOMにパースする
+   */
+  private parseHtml(html: string): Document {
+    return new JSDOM(html, { contentType: 'text/html' }).window.document;
+  }
+
+  /**
    * HTMLから文字コードを検出する
    *
    * @param doc - DOMドキュメント
    * @returns 文字コード
    */
-  private detectCharset(doc: ReturnType<DOMParser['parseFromString']>): string | null {
+  private detectCharset(doc: Document): string | null {
     if (!doc?.documentElement) return null;
 
     // content-type の charset
-    const contentType = doc.documentElement
-      .querySelector('meta[http-equiv="content-type"]')
-      ?.attributes.getNamedItem('content')?.value;
+    const contentType = doc.documentElement.querySelector('meta[http-equiv="content-type"]')?.getAttribute('content');
 
     if (contentType) {
       const match = contentType.toLowerCase().match(/charset=(.*)/);
@@ -151,9 +152,7 @@ export class OgpFetcher {
     }
 
     // charset 属性
-    const charsetMeta = doc.documentElement
-      .querySelector('meta[charset]')
-      ?.attributes.getNamedItem('charset')?.value;
+    const charsetMeta = doc.documentElement.querySelector('meta[charset]')?.getAttribute('charset');
 
     return charsetMeta?.toLowerCase() || null;
   }

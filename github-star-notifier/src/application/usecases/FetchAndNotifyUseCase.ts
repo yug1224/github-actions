@@ -5,7 +5,7 @@
  */
 
 import type { AtpAgent } from '@atproto/api';
-import type { FeedEntry } from '@mikaelporttila/rss';
+import type { FeedEntry } from '../../types/feedEntry.ts';
 import type {
   IContentRepository,
   IFeedRepository,
@@ -79,11 +79,7 @@ export class FetchAndNotifyUseCase {
   /**
    * 個別のフィードアイテムを処理
    */
-  private async processItem(
-    item: FeedEntry,
-    agent: AtpAgent,
-    webhookUrl: string | undefined,
-  ): Promise<void> {
+  private async processItem(item: FeedEntry, agent: AtpAgent, webhookUrl: string | undefined): Promise<void> {
     // URLの取得とバリデーション
     const linkUrl = this.getAbsoluteUrl(item);
     if (!linkUrl) {

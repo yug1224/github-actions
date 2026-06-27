@@ -73,6 +73,10 @@ build/Release
 # Dependency directories
 node_modules/
 jspm_packages/
+.pnpm-store/
+
+# pnpm monorepo では pnpm-lock.yaml のみ管理
+package-lock.json
 
 # Snowpack dependency directory (https://snowpack.dev/)
 web_modules/

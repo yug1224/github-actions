@@ -1,7 +1,7 @@
 /**
  * BlueskyPostFormatter のテスト
  */
-import { assertEquals } from '@std/assert';
+import { expect, test } from 'vitest';
 import { filterValidAutoDetectedFacets } from '../../../src/application/formatters/BlueskyPostFormatter.ts';
 
 const mentionFeature = (did: string) => ({
@@ -28,41 +28,33 @@ const facet = (
   features,
 });
 
-Deno.test('filterValidAutoDetectedFacets - 空 DID のメンション facet を除外する', () => {
-  const facets = [
-    facet(105, 117, [mentionFeature('')]),
-    facet(0, 10, [tagFeature('test')]),
-  ];
+test('filterValidAutoDetectedFacets - 空 DID のメンション facet を除外する', () => {
+  const facets = [facet(105, 117, [mentionFeature('')]), facet(0, 10, [tagFeature('test')])];
 
   const result = filterValidAutoDetectedFacets(facets);
 
-  assertEquals(result.length, 1);
-  assertEquals(result[0].features[0].$type, 'app.bsky.richtext.facet#tag');
+  expect(result).toHaveLength(1);
+  expect(result[0].features[0].$type).toBe('app.bsky.richtext.facet#tag');
 });
 
-Deno.test('filterValidAutoDetectedFacets - 自動検出リンク facet を除外する', () => {
-  const facets = [
-    facet(0, 28, [linkFeature('https://example.com/ent..')]),
-    facet(0, 10, [tagFeature('test')]),
-  ];
+test('filterValidAutoDetectedFacets - 自動検出リンク facet を除外する', () => {
+  const facets = [facet(0, 28, [linkFeature('https://example.com/ent..')]), facet(0, 10, [tagFeature('test')])];
 
   const result = filterValidAutoDetectedFacets(facets);
 
-  assertEquals(result.length, 1);
-  assertEquals(result[0].features[0].$type, 'app.bsky.richtext.facet#tag');
+  expect(result).toHaveLength(1);
+  expect(result[0].features[0].$type).toBe('app.bsky.richtext.facet#tag');
 });
 
-Deno.test('filterValidAutoDetectedFacets - 有効なメンション facet は保持する', () => {
-  const facets = [
-    facet(10, 20, [mentionFeature('did:plc:validhandle')]),
-  ];
+test('filterValidAutoDetectedFacets - 有効なメンション facet は保持する', () => {
+  const facets = [facet(10, 20, [mentionFeature('did:plc:validhandle')])];
 
   const result = filterValidAutoDetectedFacets(facets);
 
-  assertEquals(result.length, 1);
-  assertEquals(result[0].features[0], mentionFeature('did:plc:validhandle'));
+  expect(result).toHaveLength(1);
+  expect(result[0].features[0]).toEqual(mentionFeature('did:plc:validhandle'));
 });
 
-Deno.test('filterValidAutoDetectedFacets - 空配列を渡すと空配列を返す', () => {
-  assertEquals(filterValidAutoDetectedFacets([]), []);
+test('filterValidAutoDetectedFacets - 空配列を渡すと空配列を返す', () => {
+  expect(filterValidAutoDetectedFacets([])).toEqual([]);
 });

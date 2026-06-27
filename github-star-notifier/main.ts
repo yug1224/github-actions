@@ -1,4 +1,4 @@
-import '@std/dotenv';
+import 'dotenv/config';
 import * as AtprotoAPI from '@atproto/api';
 import type { AtpAgent } from '@atproto/api';
 import { validateAndGetEnv } from './src/config/env.ts';
@@ -45,12 +45,7 @@ async function main(): Promise<void> {
   const notificationRepo = new NotificationRepository();
 
   // ユースケースの実行
-  const useCase = new FetchAndNotifyUseCase(
-    feedRepo,
-    contentRepo,
-    summaryService,
-    notificationRepo,
-  );
+  const useCase = new FetchAndNotifyUseCase(feedRepo, contentRepo, summaryService, notificationRepo);
 
   await useCase.execute(env.RSS_URL, agent, env.WEBHOOK_URL);
 }
@@ -58,9 +53,9 @@ async function main(): Promise<void> {
 // エントリーポイント
 try {
   await main();
-  Deno.exit(0);
+  process.exit(0);
 } catch (e) {
   // エラーが発生したらログを出力して終了
   logger.error('Error occurred', e);
-  Deno.exit(1);
+  process.exit(1);
 }

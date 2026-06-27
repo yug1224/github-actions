@@ -13,9 +13,7 @@ import { SUMMARY_RULES } from '../../../config/constants.ts';
  * @example
  * { 伝聞系: ['らしい', 'やつ'] } -> "- 伝聞系: 「〜らしい」「〜やつ」"
  */
-export function formatEndingPatterns(
-  categories: Record<string, readonly string[]>,
-): string {
+export function formatEndingPatterns(categories: Record<string, readonly string[]>): string {
   return Object.entries(categories)
     .map(([category, patterns]) => {
       const formatted = patterns.map((p) => `「〜${p}」`).join('');

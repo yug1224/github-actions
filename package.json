@@ -1,0 +1,20 @@
+{
+  "name": "github-actions-monorepo",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "vp check",
+    "check:fix": "vp check --fix",
+    "test": "vp test run",
+    "test:github-star-notifier": "vp test run --project github-star-notifier",
+    "test:rss-feed-notifier": "vp test run --project rss-feed-notifier",
+    "typecheck": "tsc --noEmit -p github-star-notifier/tsconfig.json && tsc --noEmit -p rss-feed-notifier/tsconfig.json && tsc --noEmit -p link-insight-notifier/tsconfig.json"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.0",
+    "typescript": "npm:typescript@rc",
+    "vite-node": "^3.2.4",
+    "vite-plus": "^0.2.1"
+  },
+  "packageManager": "pnpm@11.9.0"
+}

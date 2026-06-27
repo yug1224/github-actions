@@ -2,9 +2,9 @@
  * formatBlueskyPostのテスト
  */
 
-import { assertEquals } from 'jsr:@std/assert';
+import { test, expect } from 'vitest';
 import formatBlueskyPost from '../src/application/formatters/BlueskyPostFormatter.ts';
-import type { AtpAgent } from 'npm:@atproto/api';
+import type { AtpAgent } from '@atproto/api';
 
 // モックエージェントの作成
 function createMockAgent(): AtpAgent {
@@ -13,7 +13,7 @@ function createMockAgent(): AtpAgent {
   } as AtpAgent;
 }
 
-Deno.test('formatBlueskyPost - サマリーあり', async () => {
+test('formatBlueskyPost - サマリーあり', async () => {
   const agent = createMockAgent();
   const result = await formatBlueskyPost({
     agent,
@@ -27,13 +27,10 @@ Deno.test('formatBlueskyPost - サマリーあり', async () => {
   });
 
   // richText.textの内容を検証
-  assertEquals(
-    result.richText.text,
-    'Test summary text\n\nTest Title\nhttps://example.com',
-  );
+  expect(result.richText.text).toBe('Test summary text\n\nTest Title\nhttps://example.com');
 });
 
-Deno.test('formatBlueskyPost - サマリーなし', async () => {
+test('formatBlueskyPost - サマリーなし', async () => {
   const agent = createMockAgent();
   const result = await formatBlueskyPost({
     agent,
@@ -46,10 +43,10 @@ Deno.test('formatBlueskyPost - サマリーなし', async () => {
     },
   });
 
-  assertEquals(result.richText.text, 'Test Title\nhttps://example.com');
+  expect(result.richText.text).toBe('Test Title\nhttps://example.com');
 });
 
-Deno.test('formatBlueskyPost - タイトルの空白をトリム', async () => {
+test('formatBlueskyPost - タイトルの空白をトリム', async () => {
   const agent = createMockAgent();
   const result = await formatBlueskyPost({
     agent,
@@ -62,10 +59,10 @@ Deno.test('formatBlueskyPost - タイトルの空白をトリム', async () => {
     },
   });
 
-  assertEquals(result.richText.text, 'Title with spaces\nhttps://example.com');
+  expect(result.richText.text).toBe('Title with spaces\nhttps://example.com');
 });
 
-Deno.test('formatBlueskyPost - 複数行サマリー', async () => {
+test('formatBlueskyPost - 複数行サマリー', async () => {
   const agent = createMockAgent();
   const result = await formatBlueskyPost({
     agent,
@@ -78,13 +75,10 @@ Deno.test('formatBlueskyPost - 複数行サマリー', async () => {
     },
   });
 
-  assertEquals(
-    result.richText.text,
-    'Line 1\nLine 2\n\nTest Title\nhttps://example.com',
-  );
+  expect(result.richText.text).toBe('Line 1\nLine 2\n\nTest Title\nhttps://example.com');
 });
 
-Deno.test('formatBlueskyPost - 長いサマリー', async () => {
+test('formatBlueskyPost - 長いサマリー', async () => {
   const agent = createMockAgent();
   const longSummary = 'A'.repeat(200);
   const result = await formatBlueskyPost({
@@ -98,8 +92,5 @@ Deno.test('formatBlueskyPost - 長いサマリー', async () => {
     },
   });
 
-  assertEquals(
-    result.richText.text,
-    `${longSummary}\n\nTest Title\nhttps://example.com`,
-  );
+  expect(result.richText.text).toBe(`${longSummary}\n\nTest Title\nhttps://example.com`);
 });

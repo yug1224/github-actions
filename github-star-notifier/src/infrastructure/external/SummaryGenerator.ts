@@ -67,38 +67,28 @@ export class SummaryGenerator {
    * 3. LLM検証（文末パターン・自然さ）
    * 不合格の場合はフィードバックを付与して再生成する
    */
-  private async generateWithValidation(
-    userMessage: string,
-    url?: string,
-  ): Promise<string> {
+  private async generateWithValidation(userMessage: string, url?: string): Promise<string> {
     let feedback: string | undefined;
     let lastSummary = '';
 
-    for (
-      let attempt = 1;
-      attempt <= SUMMARY_RULES.MAX_VALIDATION_RETRIES;
-      attempt++
-    ) {
+    for (let attempt = 1; attempt <= SUMMARY_RULES.MAX_VALIDATION_RETRIES; attempt++) {
       logger.info('サマリー生成中', {
         attempt,
         url,
         hasFeedback: !!feedback,
       });
 
-      const summaryText = await retry(
-        () => this.generateSummaryText(userMessage, feedback),
-        {
-          maxRetries: RETRY_CONFIG.SUMMARY_MAX_RETRIES,
-          onRetry: (error, retryAttempt) => {
-            logger.warn('サマリー生成をリトライ（APIエラー）', {
-              attempt,
-              retryAttempt,
-              error: String(error),
-              url,
-            });
-          },
+      const summaryText = await retry(() => this.generateSummaryText(userMessage, feedback), {
+        maxRetries: RETRY_CONFIG.SUMMARY_MAX_RETRIES,
+        onRetry: (error, retryAttempt) => {
+          logger.warn('サマリー生成をリトライ（APIエラー）', {
+            attempt,
+            retryAttempt,
+            error: String(error),
+            url,
+          });
         },
-      );
+      });
 
       logger.info('サマリー生成完了', {
         attempt,
@@ -149,10 +139,7 @@ export class SummaryGenerator {
   /**
    * サマリーを生成する（単発呼び出し、検証なし）
    */
-  private async generateSummaryText(
-    userMessage: string,
-    previousFeedback?: string,
-  ): Promise<string> {
+  private async generateSummaryText(userMessage: string, previousFeedback?: string): Promise<string> {
     const tools = [{ urlContext: {} }, { googleSearch: {} }];
 
     const config = {
@@ -162,14 +149,10 @@ export class SummaryGenerator {
       maxOutputTokens: GEMINI_CONFIG.MAX_OUTPUT_TOKENS,
       responseMimeType: GEMINI_CONFIG.RESPONSE_MIME_TYPE,
       tools,
-      systemInstruction: [
-        { text: buildSummarySystemPrompt(previousFeedback) },
-      ],
+      systemInstruction: [{ text: buildSummarySystemPrompt(previousFeedback) }],
     };
 
-    const contents = [
-      { role: 'user' as const, parts: [{ text: userMessage }] },
-    ];
+    const contents = [{ role: 'user' as const, parts: [{ text: userMessage }] }];
 
     const result = await this.ai.models.generateContent({
       model: this.modelName,
@@ -183,9 +166,7 @@ export class SummaryGenerator {
   /**
    * LLMを使用してサマリーがルールに従っているか検証する
    */
-  private async validateWithLLM(
-    summary: string,
-  ): Promise<ValidationResult> {
+  private async validateWithLLM(summary: string): Promise<ValidationResult> {
     try {
       const config = {
         temperature: 0.1,

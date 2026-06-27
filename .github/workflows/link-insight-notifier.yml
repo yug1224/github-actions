@@ -11,29 +11,31 @@ jobs:
     defaults:
       run:
         working-directory: link-insight-notifier
-    # 15分以上かかったらタイムアウト
     timeout-minutes: 15
     steps:
-      # リポジトリのチェックアウト
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      # Chromeのセットアップ
       - name: Setup Chrome
         uses: browser-actions/setup-chrome@c785b87e244131f27c9f19c1a33e2ead956ab7ce # v1.7.3
         with:
           chrome-version: latest
-      # Denoのセットアップ
-      - name: Setup Deno
-        uses: denoland/setup-deno@e95548e56dfa95d4e1a28d6f422fafe75c4c26fb # v2.0.3
+      - name: Install pnpm
+        uses: pnpm/action-setup@8912a9102ac27614460f54aedde9e1e7f9aec20d # v4.0.0
         with:
-          deno-version: v2.x
-      # dotenvxのインストール
+          version: 11
+      - name: Setup Node.js
+        uses: actions/setup-node@39370e3970a6d977327f9ca9d478cc2c9a4172 # v6.0.0
+        with:
+          node-version: '24'
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+        working-directory: ${{ github.workspace }}
       - name: Install dotenvx
         run: curl -sfS https://dotenvx.sh/install.sh | sh
-      # Denoの実行
-      - name: Deno Run
+      - name: Run notifier
         run: |
-          dotenvx run -- deno run -A main.ts
+          dotenvx run -- pnpm start
           ls -la
         env:
           DOTENV_PRIVATE_KEY: ${{secrets.DOTENV_PRIVATE_KEY_LINK_INSIGHT_NOTIFIER}}

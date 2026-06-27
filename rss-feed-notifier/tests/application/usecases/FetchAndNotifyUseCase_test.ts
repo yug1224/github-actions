@@ -2,7 +2,7 @@
  * FetchAndNotifyUseCase のテスト
  */
 
-import { assertEquals } from '@std/assert';
+import { expect, test } from 'vitest';
 import type { RichText } from '@atproto/api';
 import { FetchAndNotifyUseCase } from '../../../src/application/usecases/FetchAndNotifyUseCase.ts';
 import { BlueskyPostFormatter } from '../../../src/application/formatters/BlueskyPostFormatter.ts';
@@ -12,10 +12,7 @@ import { Url } from '../../../src/domain/models/Url.ts';
 import type { IFeedRepository } from '../../../src/domain/repositories/IFeedRepository.ts';
 import type { INotificationRepository } from '../../../src/domain/repositories/INotificationRepository.ts';
 import type { IOpenGraphRepository } from '../../../src/domain/repositories/IOpenGraphRepository.ts';
-import type {
-  IImageRepository,
-  ImageData,
-} from '../../../src/domain/repositories/IImageRepository.ts';
+import type { IImageRepository, ImageData } from '../../../src/domain/repositories/IImageRepository.ts';
 import { OpenGraphData } from '../../../src/domain/models/OpenGraphData.ts';
 import type { AtpAgent } from '@atproto/api';
 
@@ -46,12 +43,7 @@ class MockFeedRepository implements IFeedRepository {
 class MockNotificationRepository implements INotificationRepository {
   public postCount = 0;
 
-  postToBluesky(_postData: {
-    richText: RichText;
-    title: string;
-    url: string;
-    description: string;
-  }): Promise<void> {
+  postToBluesky(_postData: { richText: RichText; title: string; url: string; description: string }): Promise<void> {
     this.postCount++;
     return Promise.resolve();
   }
@@ -59,10 +51,12 @@ class MockNotificationRepository implements INotificationRepository {
 
 class MockOpenGraphRepository implements IOpenGraphRepository {
   fetch(_url: Url): Promise<OpenGraphData> {
-    return Promise.resolve(OpenGraphData.create({
-      title: 'Test Title',
-      description: 'Test Description',
-    }));
+    return Promise.resolve(
+      OpenGraphData.create({
+        title: 'Test Title',
+        description: 'Test Description',
+      }),
+    );
   }
 }
 
@@ -95,11 +89,8 @@ function createTestFeedItem(id: string): FeedItem {
   });
 }
 
-Deno.test('FetchAndNotifyUseCase - 処理時間予算に達した場合は打ち切られる', async () => {
-  const feedRepository = new MockFeedRepository([
-    createTestFeedItem('item-1'),
-    createTestFeedItem('item-2'),
-  ]);
+test('FetchAndNotifyUseCase - 処理時間予算に達した場合は打ち切られる', async () => {
+  const feedRepository = new MockFeedRepository([createTestFeedItem('item-1'), createTestFeedItem('item-2')]);
   const notificationRepository = new MockNotificationRepository();
   const formatter = new BlueskyPostFormatter(createMockAgent());
 
@@ -113,5 +104,5 @@ Deno.test('FetchAndNotifyUseCase - 処理時間予算に達した場合は打ち
 
   await useCase.execute('https://example.com/feed', 0);
 
-  assertEquals(notificationRepository.postCount, 0);
+  expect(notificationRepository.postCount).toBe(0);
 });

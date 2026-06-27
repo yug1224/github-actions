@@ -19,36 +19,34 @@ type AutoDetectedFacet = NonNullable<RichText['facets']>[number];
  * - DID 解決に失敗したメンション（did が空）は除外
  * - リンクファセットは手動追加するため自動検出分は除外
  */
-export function filterValidAutoDetectedFacets(
-  facets: AutoDetectedFacet[],
-): AutoDetectedFacet[] {
+export function filterValidAutoDetectedFacets(facets: AutoDetectedFacet[]): AutoDetectedFacet[] {
   return facets.filter((facet) =>
     facet.features.every((feature) => {
       if (feature.$type === 'app.bsky.richtext.facet#mention') {
-        return 'did' in feature &&
-          typeof feature.did === 'string' &&
-          feature.did.length > 0;
+        return 'did' in feature && typeof feature.did === 'string' && feature.did.length > 0;
       }
       if (feature.$type === 'app.bsky.richtext.facet#link') {
         return false;
       }
       return true;
-    })
+    }),
   );
 }
+
+const graphemeSegmenter = new Intl.Segmenter(undefined, { granularity: 'grapheme' });
 
 /**
  * 文字列の書記素クラスタ数をカウントする
  */
 function countGraphemes(text: string): number {
-  return [...text].length;
+  return [...graphemeSegmenter.segment(text)].length;
 }
 
 /**
  * 文字列を書記素クラスタ単位で分割する
  */
 function splitGraphemes(text: string): string[] {
-  return [...text];
+  return [...graphemeSegmenter.segment(text)].map((segment) => segment.segment);
 }
 
 /**
@@ -64,17 +62,12 @@ export class BlueskyPostFormatter {
    * @param ogpData - OGPデータ
    * @returns RichText
    */
-  async createRichText(
-    feedItem: FeedItem,
-    ogpData: OpenGraphData,
-  ): Promise<RichText> {
+  async createRichText(feedItem: FeedItem, ogpData: OpenGraphData): Promise<RichText> {
     const url = feedItem.getUrl();
     const title = ogpData.getTitle() || feedItem.getTitle() || '';
 
     // リンク表示テキストを作成
-    const linkText = this.formatLinkText(
-      url.getHostWithPath(),
-    );
+    const linkText = this.formatLinkText(url.getHostWithPath());
 
     // 投稿本文を作成
     const postBodyText = title ? `${linkText}\n${this.formatTitle(title)}` : linkText;
@@ -122,9 +115,7 @@ export class BlueskyPostFormatter {
     const count = countGraphemes(hostWithPath);
 
     if (count > TEXT_LIMITS.LINK_DISPLAY_MAX_LENGTH) {
-      const truncated = splitGraphemes(hostWithPath)
-        .slice(0, TEXT_LIMITS.LINK_DISPLAY_ELLIPSIS_LENGTH)
-        .join('');
+      const truncated = splitGraphemes(hostWithPath).slice(0, TEXT_LIMITS.LINK_DISPLAY_ELLIPSIS_LENGTH).join('');
       return truncated + ellipsis;
     }
 
@@ -142,9 +133,7 @@ export class BlueskyPostFormatter {
     const count = countGraphemes(title);
 
     if (count > TEXT_LIMITS.TITLE_MAX_LENGTH) {
-      const truncated = splitGraphemes(title)
-        .slice(0, TEXT_LIMITS.TITLE_ELLIPSIS_LENGTH)
-        .join('');
+      const truncated = splitGraphemes(title).slice(0, TEXT_LIMITS.TITLE_ELLIPSIS_LENGTH).join('');
       return truncated + ellipsis;
     }
 
@@ -158,10 +147,7 @@ export class BlueskyPostFormatter {
    * @param feedItem - フィードアイテム
    * @returns 説明文
    */
-  getDescription(
-    ogpData: OpenGraphData,
-    feedItem: FeedItem,
-  ): string {
+  getDescription(ogpData: OpenGraphData, feedItem: FeedItem): string {
     return ogpData.getDescription() || feedItem.getDescription() || '';
   }
 }

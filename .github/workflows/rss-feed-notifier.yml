@@ -2,7 +2,7 @@ name: RSS Feed Notifier
 
 on:
   schedule:
-    - cron: "*/15 * * * *"
+    - cron: '*/15 * * * *'
   workflow_dispatch:
 
 jobs:
@@ -14,21 +14,27 @@ jobs:
     timeout-minutes: 15
 
     steps:
-      # リポジトリのチェックアウト
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
-      # Denoのセットアップ
-      - name: Setup Deno
-        uses: denoland/setup-deno@909cc5acb0fdd60627fb858598759246509fa755 # v2.0.2
+      - name: Install pnpm
+        uses: pnpm/action-setup@8912a9102ac27614460f54aedde9e1e7f9aec20d # v4.0.0
         with:
-          deno-version: v2.x
+          version: 11
 
-      # 必要なディレクトリの作成
+      - name: Setup Node.js
+        uses: actions/setup-node@39370e3970a6d977327f9ca9d478cc2c9a4172 # v6.0.0
+        with:
+          node-version: '24'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+        working-directory: ${{ github.workspace }}
+
       - name: Create directories
         run: mkdir -p data temp
 
-      # タイムスタンプキャッシュの復元
       - name: Restore timestamp cache
         id: restore_timestamp
         uses: actions/cache/restore@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
@@ -38,7 +44,6 @@ jobs:
           restore-keys: |
             rss-feed-notifier-timestamp-
 
-      # アイテムリストキャッシュの復元
       - name: Restore item list cache
         id: restore_itemlist
         uses: actions/cache/restore@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
@@ -48,17 +53,14 @@ jobs:
           restore-keys: |
             rss-feed-notifier-itemlist-
 
-      # dotenvxのインストール
       - name: Install dotenvx
         run: curl -sfS https://dotenvx.sh/install.sh | sh
 
-      # Denoの実行
       - name: Run notifier
-        run: dotenvx run -- deno run -A main.ts
+        run: dotenvx run -- pnpm start
         env:
           DOTENV_PRIVATE_KEY: ${{ secrets.DOTENV_PRIVATE_KEY_RSS_FEED_NOTIFIER }}
 
-      # タイムスタンプキャッシュの保存
       - name: Save timestamp cache
         uses: actions/cache/save@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
         if: always()
@@ -66,7 +68,6 @@ jobs:
           path: rss-feed-notifier/data/.timestamp
           key: rss-feed-notifier-timestamp-${{ github.run_id }}
 
-      # アイテムリストキャッシュの保存
       - name: Save item list cache
         uses: actions/cache/save@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
         if: always()

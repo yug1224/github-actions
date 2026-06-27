@@ -2,10 +2,10 @@
  * formatWebhookMessageのテスト
  */
 
-import { assertEquals } from 'jsr:@std/assert';
+import { test, expect } from 'vitest';
 import formatWebhookMessage from '../src/application/formatters/WebhookMessageFormatter.ts';
 
-Deno.test('formatWebhookMessage - サマリーあり', () => {
+test('formatWebhookMessage - サマリーあり', () => {
   const result = formatWebhookMessage({
     item: {
       title: { value: 'Test Title' },
@@ -16,13 +16,10 @@ Deno.test('formatWebhookMessage - サマリーあり', () => {
     },
   });
 
-  assertEquals(
-    result.content,
-    'Test summary text\n\nTest Title\nhttps://example.com',
-  );
+  expect(result.content).toBe('Test summary text\n\nTest Title\nhttps://example.com');
 });
 
-Deno.test('formatWebhookMessage - サマリーなし', () => {
+test('formatWebhookMessage - サマリーなし', () => {
   const result = formatWebhookMessage({
     item: {
       title: { value: 'Test Title' },
@@ -33,10 +30,10 @@ Deno.test('formatWebhookMessage - サマリーなし', () => {
     },
   });
 
-  assertEquals(result.content, 'Test Title\nhttps://example.com');
+  expect(result.content).toBe('Test Title\nhttps://example.com');
 });
 
-Deno.test('formatWebhookMessage - 空白をトリム', () => {
+test('formatWebhookMessage - 空白をトリム', () => {
   const result = formatWebhookMessage({
     item: {
       title: { value: '  Title with spaces  ' },
@@ -47,10 +44,10 @@ Deno.test('formatWebhookMessage - 空白をトリム', () => {
     },
   });
 
-  assertEquals(result.content, 'Title with spaces\nhttps://example.com');
+  expect(result.content).toBe('Title with spaces\nhttps://example.com');
 });
 
-Deno.test('formatWebhookMessage - 複数行サマリー', () => {
+test('formatWebhookMessage - 複数行サマリー', () => {
   const result = formatWebhookMessage({
     item: {
       title: { value: 'Test Title' },
@@ -61,13 +58,10 @@ Deno.test('formatWebhookMessage - 複数行サマリー', () => {
     },
   });
 
-  assertEquals(
-    result.content,
-    'Line 1\nLine 2\n\nTest Title\nhttps://example.com',
-  );
+  expect(result.content).toBe('Line 1\nLine 2\n\nTest Title\nhttps://example.com');
 });
 
-Deno.test('formatWebhookMessage - 長いサマリー', () => {
+test('formatWebhookMessage - 長いサマリー', () => {
   const longSummary = 'A'.repeat(200);
   const result = formatWebhookMessage({
     item: {
@@ -79,13 +73,10 @@ Deno.test('formatWebhookMessage - 長いサマリー', () => {
     },
   });
 
-  assertEquals(
-    result.content,
-    `${longSummary}\n\nTest Title\nhttps://example.com`,
-  );
+  expect(result.content).toBe(`${longSummary}\n\nTest Title\nhttps://example.com`);
 });
 
-Deno.test('formatWebhookMessage - 特殊文字を含むタイトル', () => {
+test('formatWebhookMessage - 特殊文字を含むタイトル', () => {
   const result = formatWebhookMessage({
     item: {
       title: { value: 'Test & <Title> "with" \'quotes\'' },
@@ -96,8 +87,5 @@ Deno.test('formatWebhookMessage - 特殊文字を含むタイトル', () => {
     },
   });
 
-  assertEquals(
-    result.content,
-    'Test & <Title> "with" \'quotes\'\nhttps://example.com',
-  );
+  expect(result.content).toBe('Test & <Title> "with" \'quotes\'\nhttps://example.com');
 });

@@ -4,6 +4,7 @@
  * RSSフィードの取得と保存を管理
  */
 
+import { readFile, writeFile } from 'node:fs/promises';
 import { IFeedRepository } from '../../domain/repositories/IFeedRepository.ts';
 import { FeedItem } from '../../domain/models/FeedItem.ts';
 import { Timestamp } from '../../domain/models/Timestamp.ts';
@@ -46,7 +47,7 @@ export class FeedRepository implements IFeedRepository {
    */
   async getLastFetchedTimestamp(): Promise<Timestamp | null> {
     try {
-      const content = await Deno.readTextFile(FILE_PATHS.TIMESTAMP);
+      const content = await readFile(FILE_PATHS.TIMESTAMP, 'utf-8');
       const timestamp = Timestamp.fromString(content.trim());
 
       logger.info('最終取得タイムスタンプを読み込みました', {
@@ -55,7 +56,7 @@ export class FeedRepository implements IFeedRepository {
 
       return timestamp;
     } catch (error) {
-      if (error instanceof Deno.errors.NotFound) {
+      if ((error as NodeJS.ErrnoException)?.code === 'ENOENT') {
         logger.warn('タイムスタンプファイルが見つかりません', {
           path: FILE_PATHS.TIMESTAMP,
         });
@@ -70,7 +71,7 @@ export class FeedRepository implements IFeedRepository {
    * 最終取得タイムスタンプを保存する
    */
   async saveLastFetchedTimestamp(timestamp: Timestamp): Promise<void> {
-    await Deno.writeTextFile(FILE_PATHS.TIMESTAMP, timestamp.toString());
+    await writeFile(FILE_PATHS.TIMESTAMP, timestamp.toString(), 'utf-8');
 
     logger.info('最終取得タイムスタンプを保存しました', {
       timestamp: timestamp.toISOString(),
@@ -82,7 +83,7 @@ export class FeedRepository implements IFeedRepository {
    */
   async getUnpostedItems(): Promise<FeedItem[]> {
     try {
-      const content = await Deno.readTextFile(FILE_PATHS.ITEM_LIST);
+      const content = await readFile(FILE_PATHS.ITEM_LIST, 'utf-8');
       const jsonData = JSON.parse(content);
 
       if (!Array.isArray(jsonData)) {
@@ -98,7 +99,7 @@ export class FeedRepository implements IFeedRepository {
 
       return items;
     } catch (error) {
-      if (error instanceof Deno.errors.NotFound) {
+      if ((error as NodeJS.ErrnoException)?.code === 'ENOENT') {
         logger.info('未投稿アイテムリストが見つかりません', {
           path: FILE_PATHS.ITEM_LIST,
         });
@@ -115,7 +116,7 @@ export class FeedRepository implements IFeedRepository {
    */
   async saveUnpostedItems(items: FeedItem[]): Promise<void> {
     const jsonData = items.map((item) => item.toJSON());
-    await Deno.writeTextFile(FILE_PATHS.ITEM_LIST, JSON.stringify(jsonData));
+    await writeFile(FILE_PATHS.ITEM_LIST, JSON.stringify(jsonData), 'utf-8');
 
     logger.info('未投稿アイテムリストを保存しました', {
       count: items.length,

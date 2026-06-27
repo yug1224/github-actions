@@ -54,12 +54,7 @@ export class OpenGraphData {
    * プライベートコンストラクタ
    * 外部からは create() を使用する
    */
-  private constructor(
-    title?: string,
-    description?: string,
-    images: OgpImage[] = [],
-    url?: Url,
-  ) {
+  private constructor(title?: string, description?: string, images: OgpImage[] = [], url?: Url) {
     this.title = title;
     this.description = description;
     this.images = Object.freeze([...images]);
@@ -106,12 +101,7 @@ export class OpenGraphData {
       }));
     }
 
-    return new OpenGraphData(
-      data.title,
-      data.description,
-      ogpImages,
-      url,
-    );
+    return new OpenGraphData(data.title, data.description, ogpImages, url);
   }
 
   /**

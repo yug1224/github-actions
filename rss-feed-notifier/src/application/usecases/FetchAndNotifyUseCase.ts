@@ -34,10 +34,7 @@ export class FetchAndNotifyUseCase {
    * @param rssUrl - RSSフィードのURL
    * @param processingTimeBudgetMs - 投稿処理に使う時間予算（ミリ秒）
    */
-  async execute(
-    rssUrl: string,
-    processingTimeBudgetMs: number = PROCESSING_TIME_BUDGET_MS,
-  ): Promise<void> {
+  async execute(rssUrl: string, processingTimeBudgetMs: number = PROCESSING_TIME_BUDGET_MS): Promise<void> {
     logger.info('フィード取得と通知のユースケースを開始します', { rssUrl });
 
     const feedUrl = Url.create(rssUrl);
@@ -81,9 +78,7 @@ export class FetchAndNotifyUseCase {
       await this.feedRepository.saveUnpostedItems(remainingItems);
 
       // タイムスタンプを更新
-      await this.feedRepository.saveLastFetchedTimestamp(
-        item.getPublishedAt(),
-      );
+      await this.feedRepository.saveLastFetchedTimestamp(item.getPublishedAt());
     }
 
     logger.info('フィード取得と通知のユースケースが完了しました', {
@@ -157,10 +152,7 @@ export class FetchAndNotifyUseCase {
 
       // 画像を取得（存在する場合）
       const imageData = ogpData.hasImage()
-        ? await this.imageRepository.fetchAndResize(
-          ogpData.getImageUrl()!,
-          item.getPublishedAt().toMillis(),
-        )
+        ? await this.imageRepository.fetchAndResize(ogpData.getImageUrl()!, item.getPublishedAt().toMillis())
         : null;
 
       // Blueskyに投稿
@@ -178,21 +170,11 @@ export class FetchAndNotifyUseCase {
   /**
    * Blueskyに投稿する
    */
-  private async postToBluesky(
-    item: FeedItem,
-    ogpData: OpenGraphData,
-    imageData: ImageData | null,
-  ): Promise<void> {
-    const richText = await this.blueskyPostFormatter.createRichText(
-      item,
-      ogpData,
-    );
+  private async postToBluesky(item: FeedItem, ogpData: OpenGraphData, imageData: ImageData | null): Promise<void> {
+    const richText = await this.blueskyPostFormatter.createRichText(item, ogpData);
 
     const title = ogpData.getTitle() || item.getTitle();
-    const description = this.blueskyPostFormatter.getDescription(
-      ogpData,
-      item,
-    );
+    const description = this.blueskyPostFormatter.getDescription(ogpData, item);
 
     await this.notificationRepository.postToBluesky({
       richText,

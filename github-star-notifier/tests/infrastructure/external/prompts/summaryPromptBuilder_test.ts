@@ -2,7 +2,7 @@
  * プロンプトビルダーのテスト
  */
 
-import { assert, assertEquals } from 'jsr:@std/assert@^1.0.15';
+import { test, expect } from 'vitest';
 import { SUMMARY_RULES } from '../../../../src/config/constants.ts';
 import {
   buildSummarySystemPrompt,
@@ -16,141 +16,126 @@ import {
 
 // --- formatEndingPatterns ---
 
-Deno.test('formatEndingPatterns - カテゴリ別にフォーマットされる', () => {
+test('formatEndingPatterns - カテゴリ別にフォーマットされる', () => {
   const categories = {
     伝聞系: ['らしい', 'やつ'] as const,
     推測系: ['かも'] as const,
   };
   const result = formatEndingPatterns(categories);
-  assert(result.includes('- 伝聞系: 「〜らしい」「〜やつ」'));
-  assert(result.includes('- 推測系: 「〜かも」'));
+  expect(result.includes('- 伝聞系: 「〜らしい」「〜やつ」')).toBeTruthy();
+  expect(result.includes('- 推測系: 「〜かも」')).toBeTruthy();
 });
 
 // --- buildSummarySystemPrompt ---
 
-Deno.test('buildSummarySystemPrompt - MAX_LENGTHが定数から反映される', () => {
+test('buildSummarySystemPrompt - MAX_LENGTHが定数から反映される', () => {
   const prompt = buildSummarySystemPrompt();
-  assert(
-    prompt.includes(`${SUMMARY_RULES.MAX_LENGTH}文字以内`),
-    'プロンプトにMAX_LENGTHが含まれる',
-  );
+  expect(prompt.includes(`${SUMMARY_RULES.MAX_LENGTH}文字以内`)).toBeTruthy();
 });
 
-Deno.test('buildSummarySystemPrompt - 1文目の文末パターンが含まれる', () => {
+test('buildSummarySystemPrompt - 1文目の文末パターンが含まれる', () => {
   const prompt = buildSummarySystemPrompt();
   for (const [category, patterns] of Object.entries(SUMMARY_RULES.FIRST_SENTENCE_ENDINGS)) {
-    assert(prompt.includes(category), `カテゴリ「${category}」が含まれる`);
+    expect(prompt.includes(category)).toBeTruthy();
     for (const pattern of patterns) {
-      assert(prompt.includes(`〜${pattern}`), `パターン「〜${pattern}」が含まれる`);
+      expect(prompt.includes(`〜${pattern}`)).toBeTruthy();
     }
   }
 });
 
-Deno.test('buildSummarySystemPrompt - 2文目の文末パターンが含まれる', () => {
+test('buildSummarySystemPrompt - 2文目の文末パターンが含まれる', () => {
   const prompt = buildSummarySystemPrompt();
   for (const [category, patterns] of Object.entries(SUMMARY_RULES.SECOND_SENTENCE_ENDINGS)) {
-    assert(prompt.includes(category), `カテゴリ「${category}」が含まれる`);
+    expect(prompt.includes(category)).toBeTruthy();
     for (const pattern of patterns) {
-      assert(prompt.includes(`〜${pattern}`), `パターン「〜${pattern}」が含まれる`);
+      expect(prompt.includes(`〜${pattern}`)).toBeTruthy();
     }
   }
 });
 
-Deno.test('buildSummarySystemPrompt - フィードバックなしでは修正指示が含まれない', () => {
+test('buildSummarySystemPrompt - フィードバックなしでは修正指示が含まれない', () => {
   const prompt = buildSummarySystemPrompt();
-  assert(!prompt.includes('重要な修正指示'));
+  expect(prompt.includes('重要な修正指示')).toBeFalsy();
 });
 
-Deno.test('buildSummarySystemPrompt - フィードバックありで修正指示が追記される', () => {
+test('buildSummarySystemPrompt - フィードバックありで修正指示が追記される', () => {
   const feedback = '句読点が含まれています';
   const prompt = buildSummarySystemPrompt(feedback);
-  assert(prompt.includes('重要な修正指示'));
-  assert(prompt.includes(feedback));
+  expect(prompt.includes('重要な修正指示')).toBeTruthy();
+  expect(prompt.includes(feedback)).toBeTruthy();
 });
 
-Deno.test('buildSummarySystemPrompt - Few-shot例が含まれる', () => {
+test('buildSummarySystemPrompt - Few-shot例が含まれる', () => {
   const prompt = buildSummarySystemPrompt();
-  assert(prompt.includes('facebook/react:'));
-  assert(prompt.includes('astral-sh/ruff:'));
-  assert(prompt.includes('denoland/deno:'));
-  assert(prompt.includes('takaishi/tftargets:'));
+  expect(prompt.includes('facebook/react:')).toBeTruthy();
+  expect(prompt.includes('astral-sh/ruff:')).toBeTruthy();
+  expect(prompt.includes('denoland/deno:')).toBeTruthy();
+  expect(prompt.includes('takaishi/tftargets:')).toBeTruthy();
 });
 
 // --- buildSummaryUserMessage ---
 
-Deno.test('buildSummaryUserMessage - URLありの場合はURL指示メッセージを返す', () => {
+test('buildSummaryUserMessage - URLありの場合はURL指示メッセージを返す', () => {
   const message = buildSummaryUserMessage('https://github.com/denoland/deno', 'テキスト');
-  assert(message.includes('https://github.com/denoland/deno'));
-  assert(message.includes('要約してください'));
+  expect(message.includes('https://github.com/denoland/deno')).toBeTruthy();
+  expect(message.includes('要約してください')).toBeTruthy();
 });
 
-Deno.test('buildSummaryUserMessage - URLなしの場合はテキストをそのまま返す', () => {
+test('buildSummaryUserMessage - URLなしの場合はテキストをそのまま返す', () => {
   const message = buildSummaryUserMessage(undefined, 'テキストコンテンツ');
-  assertEquals(message, 'テキストコンテンツ');
+  expect(message).toBe('テキストコンテンツ');
 });
 
-Deno.test('buildSummaryUserMessage - 両方なしの場合は空文字を返す', () => {
+test('buildSummaryUserMessage - 両方なしの場合は空文字を返す', () => {
   const message = buildSummaryUserMessage(undefined, undefined);
-  assertEquals(message, '');
+  expect(message).toBe('');
 });
 
 // --- buildValidationSystemPrompt ---
 
-Deno.test('buildValidationSystemPrompt - MAX_LENGTHが定数から反映される', () => {
+test('buildValidationSystemPrompt - MAX_LENGTHが定数から反映される', () => {
   const prompt = buildValidationSystemPrompt();
-  assert(prompt.includes(`${SUMMARY_RULES.MAX_LENGTH}文字以内`));
+  expect(prompt.includes(`${SUMMARY_RULES.MAX_LENGTH}文字以内`)).toBeTruthy();
 });
 
-Deno.test('buildValidationSystemPrompt - 文末パターンが生成プロンプトと一致する', () => {
+test('buildValidationSystemPrompt - 文末パターンが生成プロンプトと一致する', () => {
   const summaryPrompt = buildSummarySystemPrompt();
   const validationPrompt = buildValidationSystemPrompt();
 
   for (const patterns of Object.values(SUMMARY_RULES.FIRST_SENTENCE_ENDINGS)) {
     for (const pattern of patterns) {
-      assert(
-        summaryPrompt.includes(`〜${pattern}`),
-        `生成プロンプトに「〜${pattern}」が含まれる`,
-      );
-      assert(
-        validationPrompt.includes(`〜${pattern}`),
-        `検証プロンプトに「〜${pattern}」が含まれる`,
-      );
+      expect(summaryPrompt.includes(`〜${pattern}`)).toBeTruthy();
+      expect(validationPrompt.includes(`〜${pattern}`)).toBeTruthy();
     }
   }
 
   for (const patterns of Object.values(SUMMARY_RULES.SECOND_SENTENCE_ENDINGS)) {
     for (const pattern of patterns) {
-      assert(
-        summaryPrompt.includes(`〜${pattern}`),
-        `生成プロンプトに「〜${pattern}」が含まれる`,
-      );
-      assert(
-        validationPrompt.includes(`〜${pattern}`),
-        `検証プロンプトに「〜${pattern}」が含まれる`,
-      );
+      expect(summaryPrompt.includes(`〜${pattern}`)).toBeTruthy();
+      expect(validationPrompt.includes(`〜${pattern}`)).toBeTruthy();
     }
   }
 });
 
-Deno.test('buildValidationSystemPrompt - 有効なJSON例が含まれる', () => {
+test('buildValidationSystemPrompt - 有効なJSON例が含まれる', () => {
   const prompt = buildValidationSystemPrompt();
-  assert(prompt.includes('{"isValid": true, "feedback": ""}'));
-  assert(prompt.includes('{"isValid": false, "feedback":'));
+  expect(prompt.includes('{"isValid": true, "feedback": ""}')).toBeTruthy();
+  expect(prompt.includes('{"isValid": false, "feedback":')).toBeTruthy();
 });
 
-Deno.test('buildValidationSystemPrompt - 検証手順が明示されている', () => {
+test('buildValidationSystemPrompt - 検証手順が明示されている', () => {
   const prompt = buildValidationSystemPrompt();
-  assert(prompt.includes('検証手順'));
-  assert(prompt.includes('二文構成か確認'));
-  assert(prompt.includes('文末が許可パターンに一致するか'));
-  assert(prompt.includes('文字数を確認'));
+  expect(prompt.includes('検証手順')).toBeTruthy();
+  expect(prompt.includes('二文構成か確認')).toBeTruthy();
+  expect(prompt.includes('文末が許可パターンに一致するか')).toBeTruthy();
+  expect(prompt.includes('文字数を確認')).toBeTruthy();
 });
 
 // --- buildValidationUserMessage ---
 
-Deno.test('buildValidationUserMessage - サマリーテキストがラップされる', () => {
+test('buildValidationUserMessage - サマリーテキストがラップされる', () => {
   const summary = 'テスト用サマリー\nテスト用2文目';
   const message = buildValidationUserMessage(summary);
-  assert(message.includes('検証してください'));
-  assert(message.includes(summary));
+  expect(message.includes('検証してください')).toBeTruthy();
+  expect(message.includes(summary)).toBeTruthy();
 });

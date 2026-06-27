@@ -1,0 +1,10 @@
+packages:
+  - 'github-star-notifier'
+  - 'rss-feed-notifier'
+  - 'link-insight-notifier'
+
+allowBuilds:
+  '@google/genai': true
+  esbuild: true
+  protobufjs: true
+  sharp: true

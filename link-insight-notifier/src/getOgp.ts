@@ -1,6 +1,8 @@
-import { DOMParser } from 'jsr:@b-fuze/deno-dom';
-import ogs from 'npm:open-graph-scraper';
-import { extractText } from 'npm:unpdf';
+import { JSDOM } from 'jsdom';
+import ogs from 'open-graph-scraper';
+import { extractText } from 'unpdf';
+
+const parseHtml = (html: string) => new JSDOM(html, { contentType: 'text/html' }).window.document;
 
 export default async (url: string) => {
   try {
@@ -25,19 +27,19 @@ export default async (url: string) => {
     }
 
     let html = new TextDecoder().decode(arrayBuffer);
-    let doc = new DOMParser().parseFromString(html, 'text/html');
+    let doc = parseHtml(html);
 
     // 文字コードがutf-8以外の場合はデコードし直す
     const charset =
-      ((doc?.documentElement?.querySelector('meta[http-equiv="content-type"]')?.attributes.getNamedItem('content')
-        ?.value || '').toLowerCase().match(/charset=(.*)/) || '')[1] ||
-      (doc?.documentElement?.querySelector('meta[charset]')?.attributes.getNamedItem('charset')?.value ||
-        '').toLowerCase() ||
+      ((doc.documentElement.querySelector('meta[http-equiv="content-type"]')?.getAttribute('content') || '')
+        .toLowerCase()
+        .match(/charset=(.*)/) || '')[1] ||
+      (doc.documentElement.querySelector('meta[charset]')?.getAttribute('charset') || '').toLowerCase() ||
       'utf-8';
 
     if (charset !== 'utf-8') {
       html = new TextDecoder(charset).decode(arrayBuffer);
-      doc = new DOMParser().parseFromString(html, 'text/html');
+      doc = parseHtml(html);
     }
 
     const { result } = await ogs({ html });

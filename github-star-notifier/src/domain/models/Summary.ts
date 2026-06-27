@@ -72,9 +72,7 @@ export class Summary {
 
     // 最大文字数チェック
     if (text.length > Summary.MAX_LENGTH) {
-      throw new InvalidSummaryError(
-        `要約文は${Summary.MAX_LENGTH}文字以内にしてください（現在: ${text.length}文字）`,
-      );
+      throw new InvalidSummaryError(`要約文は${Summary.MAX_LENGTH}文字以内にしてください（現在: ${text.length}文字）`);
     }
 
     return new Summary(text.trim(), generatedAt);
@@ -87,10 +85,7 @@ export class Summary {
    * @param maxLength - 最大文字数（デフォルト: BLUESKY_RECOMMENDED_LENGTH）
    * @returns Summaryインスタンス
    */
-  static createForBluesky(
-    text: string,
-    maxLength: number = Summary.BLUESKY_RECOMMENDED_LENGTH,
-  ): Summary {
+  static createForBluesky(text: string, maxLength: number = Summary.BLUESKY_RECOMMENDED_LENGTH): Summary {
     const trimmed = text.trim();
 
     // 最大文字数を超える場合は切り詰める
