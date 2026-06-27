@@ -69,10 +69,11 @@ export class Logger {
   /**
    * エラーレベルのログ出力
    */
-  error(message: string, error?: Error | unknown, context?: Record<string, unknown>): void {
-    const errorContext = error instanceof Error
-      ? { ...context, error: error.message, stack: error.stack }
-      : { ...context, error: String(error) };
+  error(message: string, error?: unknown, context?: Record<string, unknown>): void {
+    const errorContext =
+      error instanceof Error
+        ? { ...context, error: error.message, stack: error.stack }
+        : { ...context, error: String(error) };
 
     const logMsg: LogMessage = {
       level: 'ERROR',

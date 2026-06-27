@@ -37,13 +37,7 @@ export class FeedItem {
    * @param data - フィードアイテムのデータ
    * @returns FeedItemインスタンス
    */
-  static create(data: {
-    id: string;
-    title: string;
-    url: string;
-    publishedAt: Date;
-    description: string;
-  }): FeedItem {
+  static create(data: { id: string; title: string; url: string; publishedAt: Date; description: string }): FeedItem {
     return new FeedItem(
       data.id,
       data.title,

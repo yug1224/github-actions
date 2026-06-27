@@ -1,6 +1,7 @@
-import 'jsr:@std/dotenv/load';
-import * as path from 'jsr:@std/path';
-import AtprotoAPI from 'npm:@atproto/api';
+import 'dotenv/config';
+import { stat } from 'node:fs/promises';
+import * as path from 'node:path';
+import * as AtprotoAPI from '@atproto/api';
 import createBlueskyProps from './src/createBlueskyProps.ts';
 import createPDF from './src/createPDF.ts';
 import createPDFSummary from './src/createPDFSummary.ts';
@@ -22,27 +23,30 @@ try {
   const timestamp = new Date().getTime();
 
   // リンクを取得
-  const LINK = (Deno.env.get('LINK') || '').trim();
+  const LINK = (process.env['LINK'] || '').trim();
   console.log(LINK);
 
   // 対象がなかったら終了
   if (!LINK.length) {
     console.log('not found link');
-    Deno.exit(0);
+    process.exit(0);
   }
 
   // Bluesky エージェントを初期化
   const { BskyAgent } = AtprotoAPI;
   const service = 'https://bsky.social';
   const agent = new BskyAgent({ service });
-  const identifier = Deno.env.get('BLUESKY_IDENTIFIER') || '';
-  const password = Deno.env.get('BLUESKY_PASSWORD') || '';
+  const identifier = process.env['BLUESKY_IDENTIFIER'] || '';
+  const password = process.env['BLUESKY_PASSWORD'] || '';
   await agent.login({ identifier, password });
 
   // 10分間のタイムアウトを設定
-  setTimeout(() => {
-    throw new Error('Timeout main');
-  }, 1000 * 60 * 10);
+  setTimeout(
+    () => {
+      throw new Error('Timeout main');
+    },
+    1000 * 60 * 10,
+  );
 
   // OGP情報を取得
   let og: Ogp = {};
@@ -59,17 +63,14 @@ try {
     summary = await createYouTubeSummary(LINK);
   } else if (
     LINK.endsWith('.pdf') ||
-    [
-      'https://speakerdeck.com',
-      'https://www.docswell.com',
-    ].some((url) => LINK.startsWith(url))
+    ['https://speakerdeck.com', 'https://www.docswell.com'].some((url) => LINK.startsWith(url))
   ) {
     const pdfPath = `${timestamp}.pdf`;
     await createPDF(LINK, pdfPath);
 
     let fileInfo;
     try {
-      fileInfo = await Deno.stat(pdfPath);
+      fileInfo = await stat(pdfPath);
     } catch {
       console.log('file not found');
     }
@@ -87,15 +88,11 @@ try {
   // Summaryが空の場合は終了
   if (!summary || summary.trim() === '') {
     console.log('summary is empty');
-    Deno.exit(0);
+    process.exit(0);
   }
 
   // Bluesky および X 投稿用のデータを準備
-  const { bskyText } = await createBlueskyProps(
-    agent,
-    LINK,
-    summary,
-  );
+  const { bskyText } = await createBlueskyProps(agent, LINK, summary);
   const xText = `${summary}\n${LINK}`;
 
   // OGP画像をリサイズ
@@ -132,12 +129,12 @@ try {
   await postWebhook(xText);
 
   console.log('Success main');
-  Deno.exit(0);
+  process.exit(0);
 } catch (e: unknown) {
   // エラー情報を出力
   if (e instanceof Error) {
     console.error(e.stack);
   }
   console.error(JSON.stringify(e, null, 2));
-  Deno.exit(1);
+  process.exit(1);
 }

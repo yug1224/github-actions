@@ -37,7 +37,39 @@ src/
 
 ### 必要な環境
 
-- Deno 2.0 以上
+- Node.js 24（[mise](https://mise.jdx.dev/) 推奨）
+- pnpm 11
+- モノレポルートで `pnpm install` 済みであること
+
+### セットアップ
+
+モノレポルートの [README](../README.md) を参照してください。
+
+```bash
+cd ..  # リポジトリルート
+mise install && pnpm install
+cd rss-feed-notifier
+```
+
+### 実行
+
+```bash
+dotenvx run -- pnpm start
+```
+
+### テスト
+
+```bash
+pnpm run test
+```
+
+### その他のコマンド
+
+```bash
+pnpm run check       # モノレポ全体（フォーマット + Lint + 型チェック）
+pnpm run check:fix   # 同上（フォーマット自動修正）
+pnpm run typecheck   # このプロジェクトのみ
+```
 
 ### 環境変数
 
@@ -50,44 +82,6 @@ RSS_URL=https://example.com/feed.xml
 # Bluesky 認証情報（必須）
 BLUESKY_IDENTIFIER=your-handle.bsky.social
 BLUESKY_PASSWORD=your-app-password
-```
-
-### インストール
-
-```bash
-# 依存関係のインストール（初回のみ）
-deno cache main.ts
-```
-
-## 使い方
-
-### 実行
-
-```bash
-# 通常実行
-deno task start
-
-# 開発モード（ファイル変更を監視）
-deno task dev
-```
-
-### その他のコマンド
-
-```bash
-# 型チェック
-deno task check
-
-# フォーマット
-deno task fmt
-
-# フォーマットチェック
-deno task fmt:check
-
-# Lint
-deno task lint
-
-# テスト
-deno task test
 ```
 
 ## 動作仕様
@@ -122,12 +116,6 @@ deno task test
 
 - `@development-basic-rule.mdc`: 開発基本ルール
 - `@github-star-notifier/domain-rules`: ドメインルール
-
-### テスト
-
-```bash
-deno task test
-```
 
 ## ライセンス
 

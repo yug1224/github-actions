@@ -2,10 +2,32 @@
  * RSS feedから記事リストを取得するモジュール
  */
 
-import { type FeedEntry, parseFeed } from '@mikaelporttila/rss';
+import { readFile } from 'node:fs/promises';
+import Parser, { type Item } from 'rss-parser';
+import type { FeedEntry } from '../../types/feedEntry.ts';
 import { MAX_FEED_ITEMS, PATTERNS } from '../../config/constants.ts';
 import { logger } from '../../utils/logger.ts';
 import { NetworkError } from '../../utils/errors.ts';
+
+const parser = new Parser();
+
+/**
+ * rss-parser のアイテムを FeedEntry 形式に変換する
+ */
+export function mapItemToFeedEntry(item: Item): FeedEntry {
+  const dateStr = item.pubDate ?? item.isoDate;
+  return {
+    id: item.guid || item.link,
+    title: item.title ? { value: item.title } : undefined,
+    links: item.link ? [{ href: item.link }] : [],
+    published: dateStr ? new Date(dateStr) : undefined,
+    description: item.content
+      ? { value: item.content }
+      : item.contentSnippet
+        ? { value: item.contentSnippet }
+        : undefined,
+  };
+}
 
 /**
  * 最終実行時間を取得する
@@ -17,11 +39,11 @@ import { NetworkError } from '../../utils/errors.ts';
  */
 const getLastExecutionTime = async (): Promise<string> => {
   try {
-    const timestamp = await Deno.readTextFile('data/.timestamp');
+    const timestamp = await readFile('data/.timestamp', 'utf-8');
     logger.debug('Last execution time', { timestamp: timestamp.trim() });
     return timestamp.trim();
   } catch (error) {
-    if (error instanceof Deno.errors.NotFound) {
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
       logger.info('No timestamp file found, using default value (0)');
       return '0';
     }
@@ -48,20 +70,20 @@ export default async (rssUrl: string): Promise<FeedEntry[]> => {
     }
 
     const xml = await response.text();
-    const feed = await parseFeed(xml);
+    const feed = await parser.parseString(xml);
+    const entries = feed.items.map(mapItemToFeedEntry);
 
-    // 最終実行時間以降かつ"starred"を含む記事を抽出
-    const foundList = feed.entries.reverse().filter((item) => {
+    const foundList = entries.reverse().filter((item) => {
       return (
         item.published &&
         new Date(Number(lastExecutionTime)) < new Date(item.published) &&
         PATTERNS.STARRED_FILTER.test(item.title?.value || '')
       );
     });
-    // foundListの上限件数までを返す
+
     const result = foundList.slice(0, MAX_FEED_ITEMS);
     logger.debug('Fetched feed items', {
-      total: feed.entries.length,
+      total: entries.length,
       filtered: result.length,
     });
     return result;

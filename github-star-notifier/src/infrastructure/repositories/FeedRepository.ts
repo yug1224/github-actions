@@ -4,7 +4,8 @@
  * RSSフィードの取得とタイムスタンプ管理の実装。
  */
 
-import type { FeedEntry } from '@mikaelporttila/rss';
+import { readFile, writeFile } from 'node:fs/promises';
+import type { FeedEntry } from '../../types/feedEntry.ts';
 import type { IFeedRepository } from '../../domain/repositories/index.ts';
 import fetchFeedItems from '../external/RssFeedClient.ts';
 
@@ -26,10 +27,13 @@ export class FeedRepository implements IFeedRepository {
    */
   async getLastFetchedTimestamp(): Promise<number> {
     try {
-      const content = await Deno.readTextFile(this.timestampFile);
+      const content = await readFile(this.timestampFile, 'utf-8');
       return parseInt(content, 10) || 0;
-    } catch {
-      return 0;
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+        return 0;
+      }
+      throw error;
     }
   }
 
@@ -37,6 +41,6 @@ export class FeedRepository implements IFeedRepository {
    * フィードを取得したタイムスタンプを保存する
    */
   async saveLastFetchedTimestamp(timestamp: number): Promise<void> {
-    await Deno.writeTextFile(this.timestampFile, timestamp.toString());
+    await writeFile(this.timestampFile, timestamp.toString(), 'utf-8');
   }
 }

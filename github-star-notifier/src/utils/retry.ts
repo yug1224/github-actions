@@ -14,10 +14,7 @@ export interface RetryOptions {
  * @param options リトライオプション
  * @returns 関数の実行結果
  */
-export async function retry<T>(
-  fn: () => Promise<T>,
-  options: RetryOptions,
-): Promise<T> {
+export async function retry<T>(fn: () => Promise<T>, options: RetryOptions): Promise<T> {
   const { maxRetries, onRetry, shouldRetry } = options;
   let lastError: unknown;
 
@@ -86,10 +83,7 @@ export async function retryWithBackoff<T>(
       }
 
       // Exponential backoff: 2^attempt * initialDelay
-      const delay = Math.min(
-        initialDelayMs * Math.pow(2, attempt),
-        maxDelayMs,
-      );
+      const delay = Math.min(initialDelayMs * Math.pow(2, attempt), maxDelayMs);
       await new Promise((resolve) => setTimeout(resolve, delay));
     }
   }

@@ -1,5 +1,5 @@
 export default async (text: string) => {
-  const WEBHOOK_URL = Deno.env.get('WEBHOOK_URL');
+  const WEBHOOK_URL = process.env['WEBHOOK_URL'];
   if (!WEBHOOK_URL) {
     console.log('WEBHOOK_URL is not defined');
     return;

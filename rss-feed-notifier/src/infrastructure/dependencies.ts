@@ -8,12 +8,7 @@ import { RssFeedClient } from './external/RssFeedClient.ts';
 import { OgpFetcher } from './external/OgpFetcher.ts';
 import { ImageProcessor } from './external/ImageProcessor.ts';
 import { BlueskyClient } from './external/BlueskyClient.ts';
-import {
-  FeedRepository,
-  ImageRepository,
-  NotificationRepository,
-  OpenGraphRepository,
-} from './repositories/index.ts';
+import { FeedRepository, ImageRepository, NotificationRepository, OpenGraphRepository } from './repositories/index.ts';
 import { BlueskyPostFormatter } from '../application/formatters/BlueskyPostFormatter.ts';
 
 /**

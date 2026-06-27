@@ -2,7 +2,7 @@
  * アプリケーション全体で使用する型定義
  */
 
-import { type FeedEntry } from '@mikaelporttila/rss';
+import { type FeedEntry } from './feedEntry.ts';
 import { type AtpAgent, type RichText } from '@atproto/api';
 
 // Feed関連の型
@@ -55,12 +55,4 @@ export interface PublishToBlueskyParams {
   link: string;
   mimeType?: string;
   image?: Uint8Array;
-}
-
-// Blob upload結果
-export interface UploadBlobResult {
-  $type: 'blob';
-  ref: { $link: string };
-  mimeType: string;
-  size: number;
 }

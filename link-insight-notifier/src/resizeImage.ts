@@ -1,11 +1,6 @@
-import {
-  ImageMagick,
-  IMagickImage,
-  initialize,
-  MagickFormat,
-} from 'https://deno.land/x/imagemagick_deno@0.0.31/mod.ts';
+import sharp from 'sharp';
 
-export default async (url: string, timestamp: number) => {
+export default async (url: string, _timestamp: number) => {
   try {
     const fetchRetry = async (url: string, retryCount = 0): Promise<Response | undefined> => {
       const response = await fetch(url);
@@ -35,27 +30,21 @@ export default async (url: string, timestamp: number) => {
       buffer: ArrayBuffer;
       retryCount?: number;
     }): Promise<{ mimeType?: string; resizedImage?: Uint8Array }> => {
-      await initialize();
-
       const maxWidth = 2000;
       const maxHeight = 2000;
       const maxByteLength = 976.56 * 1000;
       const mimeType = 'image/avif';
+      const quality = 100 - retryCount * 2;
 
-      const resizedImage = await ImageMagick.read(new Uint8Array(buffer), async (img: IMagickImage) => {
-        img.resize(maxWidth, maxHeight);
-        img.quality = 100 - (retryCount * 2);
+      const resizedBuffer = await sharp(Buffer.from(buffer))
+        .resize(maxWidth, maxHeight, { fit: 'inside', withoutEnlargement: true })
+        .avif({ quality })
+        .toBuffer();
 
-        await img.write(MagickFormat.Avif, async (data: Uint8Array) => {
-          await Deno.writeFile(`${timestamp}.avif`, data);
-          return;
-        });
-        const resized = await Deno.readFile(`${timestamp}.avif`);
-        return resized;
-      });
+      const resizedImage = new Uint8Array(resizedBuffer);
 
       console.log('resizedImage.byteLength', resizedImage.byteLength);
-      if (resizedImage && resizedImage.byteLength > maxByteLength) {
+      if (resizedImage.byteLength > maxByteLength) {
         // リトライ処理
         console.log('Retry resizedImage');
         return await resizeRetry({ buffer, retryCount: retryCount + 1 });

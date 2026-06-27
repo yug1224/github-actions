@@ -1,7 +1,7 @@
 /**
  * エラークラスのテスト
  */
-import { assertEquals, assertInstanceOf } from '@std/assert';
+import { expect, test } from 'vitest';
 import {
   AppError,
   AuthError,
@@ -11,89 +11,85 @@ import {
   UploadError,
 } from '../../src/utils/errors.ts';
 
-Deno.test('AppError は基本的なエラー情報を持つ', () => {
-  const error = new AppError(
-    'テストエラー',
-    'UNKNOWN_ERROR',
-    { key: 'value' },
-  );
+test('AppError は基本的なエラー情報を持つ', () => {
+  const error = new AppError('テストエラー', 'UNKNOWN_ERROR', { key: 'value' });
 
-  assertEquals(error.message, 'テストエラー');
-  assertEquals(error.code, 'UNKNOWN_ERROR');
-  assertEquals(error.context, { key: 'value' });
-  assertEquals(error.name, 'AppError');
+  expect(error.message).toBe('テストエラー');
+  expect(error.code).toBe('UNKNOWN_ERROR');
+  expect(error.context).toEqual({ key: 'value' });
+  expect(error.name).toBe('AppError');
 });
 
-Deno.test('AppError はcauseを持つことができる', () => {
+test('AppError はcauseを持つことができる', () => {
   const cause = new Error('元のエラー');
   const error = new AppError('ラップされたエラー', 'UNKNOWN_ERROR', {}, cause);
 
-  assertEquals(error.cause, cause);
+  expect(error.cause).toBe(cause);
 });
 
-Deno.test('AppError.toJSON() はエラー情報をJSONとして返す', () => {
+test('AppError.toJSON() はエラー情報をJSONとして返す', () => {
   const error = new AppError('テストエラー', 'UNKNOWN_ERROR', { key: 'value' });
   const json = error.toJSON();
 
-  assertEquals(json.name, 'AppError');
-  assertEquals(json.message, 'テストエラー');
-  assertEquals(json.code, 'UNKNOWN_ERROR');
-  assertEquals(json.context, { key: 'value' });
+  expect(json.name).toBe('AppError');
+  expect(json.message).toBe('テストエラー');
+  expect(json.code).toBe('UNKNOWN_ERROR');
+  expect(json.context).toEqual({ key: 'value' });
 });
 
-Deno.test('FileNotFoundError はファイルパスを持つ', () => {
+test('FileNotFoundError はファイルパスを持つ', () => {
   const error = new FileNotFoundError('/path/to/file.txt');
 
-  assertEquals(error.message.includes('/path/to/file.txt'), true);
-  assertEquals(error.code, 'FILE_NOT_FOUND');
-  assertEquals(error.context?.filePath, '/path/to/file.txt');
-  assertEquals(error.name, 'FileNotFoundError');
-  assertInstanceOf(error, AppError);
+  expect(error.message).toContain('/path/to/file.txt');
+  expect(error.code).toBe('FILE_NOT_FOUND');
+  expect(error.context?.filePath).toBe('/path/to/file.txt');
+  expect(error.name).toBe('FileNotFoundError');
+  expect(error).toBeInstanceOf(AppError);
 });
 
-Deno.test('NetworkError はURL情報を持つ', () => {
+test('NetworkError はURL情報を持つ', () => {
   const error = new NetworkError('https://example.com', 404);
 
-  assertEquals(error.message.includes('https://example.com'), true);
-  assertEquals(error.code, 'NETWORK_ERROR');
-  assertEquals(error.context?.url, 'https://example.com');
-  assertEquals(error.context?.statusCode, 404);
-  assertEquals(error.name, 'NetworkError');
-  assertInstanceOf(error, AppError);
+  expect(error.message).toContain('https://example.com');
+  expect(error.code).toBe('NETWORK_ERROR');
+  expect(error.context?.url).toBe('https://example.com');
+  expect(error.context?.statusCode).toBe(404);
+  expect(error.name).toBe('NetworkError');
+  expect(error).toBeInstanceOf(AppError);
 });
 
-Deno.test('NetworkError はステータスコードなしでも作成できる', () => {
+test('NetworkError はステータスコードなしでも作成できる', () => {
   const error = new NetworkError('https://example.com');
 
-  assertEquals(error.context?.statusCode, undefined);
+  expect(error.context?.statusCode).toBeUndefined();
 });
 
-Deno.test('ImageProcessError はメッセージとコンテキストを持つ', () => {
+test('ImageProcessError はメッセージとコンテキストを持つ', () => {
   const error = new ImageProcessError('画像処理失敗', { size: 1000 });
 
-  assertEquals(error.message, '画像処理失敗');
-  assertEquals(error.code, 'IMAGE_PROCESS_ERROR');
-  assertEquals(error.context?.size, 1000);
-  assertEquals(error.name, 'ImageProcessError');
-  assertInstanceOf(error, AppError);
+  expect(error.message).toBe('画像処理失敗');
+  expect(error.code).toBe('IMAGE_PROCESS_ERROR');
+  expect(error.context?.size).toBe(1000);
+  expect(error.name).toBe('ImageProcessError');
+  expect(error).toBeInstanceOf(AppError);
 });
 
-Deno.test('UploadError はメッセージとコンテキストを持つ', () => {
+test('UploadError はメッセージとコンテキストを持つ', () => {
   const error = new UploadError('アップロード失敗', { fileName: 'test.jpg' });
 
-  assertEquals(error.message, 'アップロード失敗');
-  assertEquals(error.code, 'UPLOAD_ERROR');
-  assertEquals(error.context?.fileName, 'test.jpg');
-  assertEquals(error.name, 'UploadError');
-  assertInstanceOf(error, AppError);
+  expect(error.message).toBe('アップロード失敗');
+  expect(error.code).toBe('UPLOAD_ERROR');
+  expect(error.context?.fileName).toBe('test.jpg');
+  expect(error.name).toBe('UploadError');
+  expect(error).toBeInstanceOf(AppError);
 });
 
-Deno.test('AuthError はサービス名を持つ', () => {
+test('AuthError はサービス名を持つ', () => {
   const error = new AuthError('Bluesky');
 
-  assertEquals(error.message.includes('Bluesky'), true);
-  assertEquals(error.code, 'AUTH_ERROR');
-  assertEquals(error.context?.service, 'Bluesky');
-  assertEquals(error.name, 'AuthError');
-  assertInstanceOf(error, AppError);
+  expect(error.message).toContain('Bluesky');
+  expect(error.code).toBe('AUTH_ERROR');
+  expect(error.context?.service).toBe('Bluesky');
+  expect(error.name).toBe('AuthError');
+  expect(error).toBeInstanceOf(AppError);
 });

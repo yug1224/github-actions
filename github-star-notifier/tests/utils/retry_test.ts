@@ -2,10 +2,10 @@
  * リトライヘルパーのテスト
  */
 
-import { assertEquals, assertRejects } from 'jsr:@std/assert';
+import { test, expect } from 'vitest';
 import { retry } from '../../src/utils/retry.ts';
 
-Deno.test('retry - 成功ケース', async () => {
+test('retry - 成功ケース', async () => {
   let callCount = 0;
   const result = await retry(
     () => {
@@ -15,11 +15,11 @@ Deno.test('retry - 成功ケース', async () => {
     { maxRetries: 3 },
   );
 
-  assertEquals(result, 'success');
-  assertEquals(callCount, 1);
+  expect(result).toBe('success');
+  expect(callCount).toBe(1);
 });
 
-Deno.test('retry - 1回失敗後に成功', async () => {
+test('retry - 1回失敗後に成功', async () => {
   let callCount = 0;
   const result = await retry(
     () => {
@@ -32,30 +32,26 @@ Deno.test('retry - 1回失敗後に成功', async () => {
     { maxRetries: 3 },
   );
 
-  assertEquals(result, 'success');
-  assertEquals(callCount, 2);
+  expect(result).toBe('success');
+  expect(callCount).toBe(2);
 });
 
-Deno.test('retry - 最大リトライ回数を超える', async () => {
+test('retry - 最大リトライ回数を超える', async () => {
   let callCount = 0;
-  await assertRejects(
-    () => {
-      return retry(
-        () => {
-          callCount++;
-          throw new Error('Always fails');
-        },
-        { maxRetries: 2 },
-      );
-    },
-    Error,
-    'Always fails',
-  );
+  await expect(
+    retry(
+      () => {
+        callCount++;
+        throw new Error('Always fails');
+      },
+      { maxRetries: 2 },
+    ),
+  ).rejects.toThrow('Always fails');
 
-  assertEquals(callCount, 3); // 初回 + 2回リトライ = 3回
+  expect(callCount).toBe(3); // 初回 + 2回リトライ = 3回
 });
 
-Deno.test('retry - onRetryコールバック', async () => {
+test('retry - onRetryコールバック', async () => {
   const retryAttempts: number[] = [];
   let callCount = 0;
 
@@ -75,31 +71,26 @@ Deno.test('retry - onRetryコールバック', async () => {
     },
   );
 
-  assertEquals(retryAttempts, [1, 2]);
+  expect(retryAttempts).toEqual([1, 2]);
 });
 
-Deno.test('retry - shouldRetry条件', async () => {
+test('retry - shouldRetry条件', async () => {
   let callCount = 0;
 
-  await assertRejects(
-    () => {
-      return retry(
-        () => {
-          callCount++;
-          throw new Error('Special error');
+  await expect(
+    retry(
+      () => {
+        callCount++;
+        throw new Error('Special error');
+      },
+      {
+        maxRetries: 5,
+        shouldRetry: (error) => {
+          return !(error instanceof Error && error.message === 'Special error');
         },
-        {
-          maxRetries: 5,
-          shouldRetry: (error) => {
-            // 特定のエラーの場合はリトライしない
-            return !(error instanceof Error && error.message === 'Special error');
-          },
-        },
-      );
-    },
-    Error,
-    'Special error',
-  );
+      },
+    ),
+  ).rejects.toThrow('Special error');
 
-  assertEquals(callCount, 1); // リトライしないので1回のみ
+  expect(callCount).toBe(1); // リトライしないので1回のみ
 });

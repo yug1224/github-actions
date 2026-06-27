@@ -1,5 +1,5 @@
-import { JSDOM } from 'npm:jsdom';
-import { Readability } from 'npm:@mozilla/readability';
+import { JSDOM } from 'jsdom';
+import { Readability } from '@mozilla/readability';
 
 export default async (url: string): Promise<string | null> => {
   try {

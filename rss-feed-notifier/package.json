@@ -1,0 +1,22 @@
+{
+  "name": "rss-feed-notifier",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "vite-node main.ts",
+    "check": "pnpm --dir .. run check",
+    "check:fix": "pnpm --dir .. run check:fix",
+    "test": "pnpm --dir .. exec vp test run --project rss-feed-notifier",
+    "typecheck": "pnpm --dir .. exec tsc --noEmit -p rss-feed-notifier/tsconfig.json"
+  },
+  "dependencies": {
+    "@atproto/api": "^0.20.22",
+    "dotenv": "^17.4.2",
+    "jsdom": "^29.1.1",
+    "open-graph-scraper": "^6.12.0",
+    "rss-parser": "^3.13.0",
+    "sharp": "^0.35.2",
+    "unpdf": "^1.6.2"
+  }
+}

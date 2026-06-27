@@ -4,51 +4,56 @@
 pre-commit:
   parallel: true
   commands:
-    # github-star-notifier
     format-github-star:
-      glob: "github-star-notifier/**/*.{ts,tsx,js,jsx,json,jsonc}"
-      run: deno fmt {staged_files}
+      glob: 'github-star-notifier/**/*.{ts,tsx,js,jsx,json,jsonc}'
+      run: pnpm exec vp fmt {staged_files}
       stage_fixed: true
 
     lint-github-star:
-      glob: "github-star-notifier/**/*.{ts,tsx}"
-      run: deno lint {staged_files}
+      glob: 'github-star-notifier/**/*.{ts,tsx}'
+      run: pnpm exec vp lint {staged_files}
 
     type-check-github-star:
-      glob: "github-star-notifier/**/*.{ts,tsx}"
-      run: cd github-star-notifier && deno check main.ts
+      glob: 'github-star-notifier/**/*.{ts,tsx}'
+      run: pnpm exec tsc --noEmit -p github-star-notifier/tsconfig.json
 
-    # rss-feed-notifier
     format-rss-feed:
-      glob: "rss-feed-notifier/**/*.{ts,tsx,js,jsx,json,jsonc}"
-      run: deno fmt {staged_files}
+      glob: 'rss-feed-notifier/**/*.{ts,tsx,js,jsx,json,jsonc}'
+      run: pnpm exec vp fmt {staged_files}
       stage_fixed: true
 
     lint-rss-feed:
-      glob: "rss-feed-notifier/**/*.{ts,tsx}"
-      run: deno lint {staged_files}
+      glob: 'rss-feed-notifier/**/*.{ts,tsx}'
+      run: pnpm exec vp lint {staged_files}
 
     type-check-rss-feed:
-      glob: "rss-feed-notifier/**/*.{ts,tsx}"
-      run: cd rss-feed-notifier && deno check main.ts
+      glob: 'rss-feed-notifier/**/*.{ts,tsx}'
+      run: pnpm exec tsc --noEmit -p rss-feed-notifier/tsconfig.json
+
+    format-link-insight:
+      glob: 'link-insight-notifier/**/*.{ts,tsx,js,jsx,json,jsonc}'
+      run: pnpm exec vp fmt {staged_files}
+      stage_fixed: true
+
+    lint-link-insight:
+      glob: 'link-insight-notifier/**/*.{ts,tsx}'
+      run: pnpm exec vp lint {staged_files}
+
+    type-check-link-insight:
+      glob: 'link-insight-notifier/**/*.{ts,tsx}'
+      run: pnpm exec tsc --noEmit -p link-insight-notifier/tsconfig.json
 
 pre-push:
   parallel: false
   commands:
-    # github-star-notifier
     test-github-star:
-      glob: "github-star-notifier/**/*.{ts,tsx}"
-      run: cd github-star-notifier && deno test tests/
+      glob: 'github-star-notifier/**/*.{ts,tsx}'
+      run: pnpm exec vitest run --project github-star-notifier
 
-    final-check-github-star:
-      glob: "github-star-notifier/**/*.{ts,tsx}"
-      run: cd github-star-notifier && deno check main.ts
-
-    # rss-feed-notifier
     test-rss-feed:
-      glob: "rss-feed-notifier/**/*.{ts,tsx}"
-      run: cd rss-feed-notifier && deno test tests/
+      glob: 'rss-feed-notifier/**/*.{ts,tsx}'
+      run: pnpm exec vitest run --project rss-feed-notifier
 
-    final-check-rss-feed:
-      glob: "rss-feed-notifier/**/*.{ts,tsx}"
-      run: cd rss-feed-notifier && deno check main.ts
+    typecheck-all:
+      glob: '**/*.{ts,tsx}'
+      run: pnpm run typecheck

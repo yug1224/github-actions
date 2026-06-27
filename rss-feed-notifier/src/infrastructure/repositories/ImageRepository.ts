@@ -18,10 +18,7 @@ export class ImageRepository implements IImageRepository {
   /**
    * 画像を取得してリサイズする
    */
-  async fetchAndResize(
-    imageUrl: Url,
-    timestamp: number,
-  ): Promise<ImageData | null> {
+  async fetchAndResize(imageUrl: Url, timestamp: number): Promise<ImageData | null> {
     try {
       logger.info('画像を取得してリサイズします', {
         imageUrl: imageUrl.toString(),
@@ -37,15 +34,10 @@ export class ImageRepository implements IImageRepository {
       }
 
       // 画像を取得
-      const imageBuffer = await this.imageProcessor.fetchImage(
-        imageUrl.toString(),
-      );
+      const imageBuffer = await this.imageProcessor.fetchImage(imageUrl.toString());
 
       // 画像をリサイズ
-      const { data, mimeType } = await this.imageProcessor.resizeImage(
-        imageBuffer,
-        timestamp,
-      );
+      const { data, mimeType } = await this.imageProcessor.resizeImage(imageBuffer, timestamp);
 
       logger.info('画像の取得とリサイズに成功しました', {
         byteLength: data.byteLength,

@@ -4,12 +4,9 @@
  * 画像の取得、リサイズ、最適化機能を提供
  */
 
-import {
-  ImageMagick,
-  IMagickImage,
-  initialize,
-  MagickFormat,
-} from 'https://deno.land/x/imagemagick_deno@0.0.31/mod.ts';
+import { mkdir, writeFile } from 'node:fs/promises';
+import { dirname } from 'node:path';
+import sharp from 'sharp';
 import { logger } from '../../utils/logger.ts';
 import { retry } from '../../utils/retry.ts';
 import { ImageProcessError, NetworkError } from '../../utils/errors.ts';
@@ -56,17 +53,8 @@ export class ImageProcessor {
    * @returns リサイズされた画像データとMIMEタイプ
    * @throws {ImageProcessError} 画像処理エラーの場合
    */
-  async resizeImage(
-    imageBuffer: ArrayBuffer,
-    timestamp: number,
-  ): Promise<{ data: Uint8Array; mimeType: string }> {
-    await initialize();
-
-    const result = await this.resizeWithQualityAdjustment(
-      imageBuffer,
-      timestamp,
-      0,
-    );
+  async resizeImage(imageBuffer: ArrayBuffer, timestamp: number): Promise<{ data: Uint8Array; mimeType: string }> {
+    const result = await this.resizeWithQualityAdjustment(imageBuffer, timestamp, 0);
 
     if (!result) {
       throw new ImageProcessError('画像のリサイズに失敗しました', { timestamp });
@@ -88,7 +76,7 @@ export class ImageProcessor {
     timestamp: number,
     retryCount: number,
   ): Promise<{ data: Uint8Array; mimeType: string } | null> {
-    const quality = 100 - (retryCount * 2);
+    const quality = 100 - retryCount * 2;
 
     logger.info('画像をリサイズしています', {
       timestamp,
@@ -96,31 +84,20 @@ export class ImageProcessor {
       retryCount,
     });
 
-    const resizedImage = await ImageMagick.read(
-      new Uint8Array(imageBuffer),
-      (img: IMagickImage) => {
-        img.resize(IMAGE_CONFIG.MAX_WIDTH, IMAGE_CONFIG.MAX_HEIGHT);
-        img.quality = quality;
+    const resizedBuffer = await sharp(Buffer.from(imageBuffer))
+      .resize(IMAGE_CONFIG.MAX_WIDTH, IMAGE_CONFIG.MAX_HEIGHT, {
+        fit: 'inside',
+        withoutEnlargement: true,
+      })
+      .avif({ quality })
+      .toBuffer();
 
-        // img.write()のコールバックで直接データを取得
-        let imageData: Uint8Array | null = null;
-        img.write(
-          MagickFormat.Avif,
-          (data: Uint8Array) => {
-            // データのコピーを作成（コールバック外で使用するため）
-            imageData = new Uint8Array(data);
-          },
-        );
+    const resizedImage = new Uint8Array(resizedBuffer);
 
-        // デバッグ用にファイルにも保存
-        const outputPath = `${FILE_PATHS.TEMP_DIR}${timestamp}.${IMAGE_CONFIG.FORMAT}`;
-        if (imageData) {
-          Deno.writeFileSync(outputPath, imageData);
-        }
-
-        return imageData!;
-      },
-    );
+    // デバッグ用にファイルにも保存
+    const outputPath = `${FILE_PATHS.TEMP_DIR}${timestamp}.${IMAGE_CONFIG.FORMAT}`;
+    await mkdir(dirname(outputPath), { recursive: true });
+    await writeFile(outputPath, resizedImage);
 
     logger.info('画像のリサイズが完了しました', {
       byteLength: resizedImage.byteLength,
@@ -134,11 +111,7 @@ export class ImageProcessor {
         retryCount,
       });
 
-      return await this.resizeWithQualityAdjustment(
-        imageBuffer,
-        timestamp,
-        retryCount + 1,
-      );
+      return await this.resizeWithQualityAdjustment(imageBuffer, timestamp, retryCount + 1);
     }
 
     return {

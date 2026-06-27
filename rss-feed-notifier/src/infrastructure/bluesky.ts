@@ -14,19 +14,13 @@ import { AuthError } from '../utils/errors.ts';
  * @returns 初期化済みのBskyAgent
  * @throws {AppError} 認証に失敗した場合
  */
-export async function initializeBlueskyAgent(
-  identifier: string,
-  password: string,
-): Promise<BskyAgent> {
+export async function initializeBlueskyAgent(identifier: string, password: string): Promise<BskyAgent> {
   try {
     const agent = new BskyAgent({ service: BLUESKY_SERVICE_URL });
     await agent.login({ identifier, password });
     logger.info('Blueskyにログインしました');
     return agent;
   } catch (error) {
-    throw new AuthError(
-      'Bluesky',
-      error instanceof Error ? error : undefined,
-    );
+    throw new AuthError('Bluesky', error instanceof Error ? error : undefined);
   }
 }

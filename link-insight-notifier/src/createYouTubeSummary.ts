@@ -1,4 +1,4 @@
-import { GoogleGenerativeAI } from 'npm:@google/generative-ai';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 const systemInstruction = `
 # Role
@@ -20,13 +20,13 @@ const systemInstruction = `
 「仮想DOMの差分更新で、UI描画が速くなるらしい。リスト表示が多い画面で特に効果があるかも。」
 `;
 
-const apiKey = Deno.env.get('GOOGLE_AI_API_KEY') || '';
+const apiKey = process.env['GOOGLE_AI_API_KEY'] || '';
 const genAI = new GoogleGenerativeAI(apiKey);
 
 export default async (url: string): Promise<string> => {
   const retry = async (retryCount = 0) => {
     try {
-      const modelName = Deno.env.get('GEMINI_MODEL') || 'gemini-2.0-flash-lite';
+      const modelName = process.env['GEMINI_MODEL'] || 'gemini-2.0-flash-lite';
       const model = genAI.getGenerativeModel({
         model: modelName,
         systemInstruction,

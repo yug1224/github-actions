@@ -13,16 +13,12 @@ export interface EnvConfig {
  * @throws {Error} 必須の環境変数が不足している場合
  */
 export function validateAndGetEnv(): EnvConfig {
-  const requiredEnvVars = [
-    'RSS_URL',
-    'BLUESKY_IDENTIFIER',
-    'BLUESKY_PASSWORD',
-  ];
+  const requiredEnvVars = ['RSS_URL', 'BLUESKY_IDENTIFIER', 'BLUESKY_PASSWORD'];
 
   const missingVars: string[] = [];
 
   for (const varName of requiredEnvVars) {
-    const value = Deno.env.get(varName);
+    const value = process.env[varName];
     if (!value || value.trim() === '') {
       missingVars.push(varName);
     }
@@ -36,8 +32,8 @@ export function validateAndGetEnv(): EnvConfig {
   }
 
   return {
-    RSS_URL: Deno.env.get('RSS_URL')!,
-    BLUESKY_IDENTIFIER: Deno.env.get('BLUESKY_IDENTIFIER')!,
-    BLUESKY_PASSWORD: Deno.env.get('BLUESKY_PASSWORD')!,
+    RSS_URL: process.env['RSS_URL']!,
+    BLUESKY_IDENTIFIER: process.env['BLUESKY_IDENTIFIER']!,
+    BLUESKY_PASSWORD: process.env['BLUESKY_PASSWORD']!,
   };
 }

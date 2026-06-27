@@ -4,7 +4,7 @@
  * RSSフィードの取得とパース機能を提供
  */
 
-import { parseFeed } from '@mikaelporttila/rss';
+import Parser from 'rss-parser';
 import { logger } from '../../utils/logger.ts';
 import { NetworkError } from '../../utils/errors.ts';
 
@@ -23,6 +23,8 @@ export interface RssFeedEntry {
  * RSSフィードクライアント
  */
 export class RssFeedClient {
+  private readonly parser = new Parser();
+
   /**
    * RSSフィードを取得してパースする
    *
@@ -41,14 +43,23 @@ export class RssFeedClient {
       }
 
       const xml = await response.text();
-      const feed = await parseFeed(xml);
+      const feed = await this.parser.parseString(xml);
+
+      const entries: RssFeedEntry[] = (feed.items ?? []).map((item) => ({
+        id: item.guid ?? item.link ?? item.title ?? '',
+        title: item.title ? { value: item.title } : undefined,
+        links: item.link ? [{ href: item.link }] : [],
+        published: item.pubDate ?? item.isoDate,
+        description:
+          (item.contentSnippet ?? item.content) ? { value: item.contentSnippet ?? item.content ?? '' } : undefined,
+      }));
 
       logger.info('RSSフィードの取得に成功しました', {
         feedUrl,
-        entryCount: feed.entries.length,
+        entryCount: entries.length,
       });
 
-      return feed.entries as RssFeedEntry[];
+      return entries;
     } catch (error) {
       if (error instanceof NetworkError) {
         throw error;

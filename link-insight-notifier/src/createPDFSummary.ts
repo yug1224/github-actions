@@ -1,5 +1,5 @@
-import { FileMetadataResponse, GoogleAIFileManager } from 'npm:@google/generative-ai/server';
-import { GoogleGenerativeAI } from 'npm:@google/generative-ai';
+import { FileMetadataResponse, GoogleAIFileManager } from '@google/generative-ai/server';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 const systemInstruction = `
 # Role
@@ -21,7 +21,7 @@ const systemInstruction = `
 「仮想DOMの差分更新で、UI描画が速くなるらしい。リスト表示が多い画面で特に効果があるかも。」
 `;
 
-const apiKey = Deno.env.get('GOOGLE_AI_API_KEY') || '';
+const apiKey = process.env['GOOGLE_AI_API_KEY'] || '';
 const genAI = new GoogleGenerativeAI(apiKey);
 const fileManager = new GoogleAIFileManager(apiKey);
 
@@ -53,18 +53,13 @@ async function waitForFilesActive(files: FileMetadataResponse[]) {
 export default async (path: string): Promise<string> => {
   const retry = async (retryCount = 0) => {
     try {
-      const modelName = Deno.env.get('GEMINI_MODEL') || 'gemini-2.0-flash-lite';
+      const modelName = process.env['GEMINI_MODEL'] || 'gemini-2.0-flash-lite';
       const model = genAI.getGenerativeModel({
         model: modelName,
         systemInstruction,
       });
 
-      const files = [
-        await uploadToGemini(
-          path,
-          'application/pdf',
-        ),
-      ];
+      const files = [await uploadToGemini(path, 'application/pdf')];
 
       await waitForFilesActive(files);
 

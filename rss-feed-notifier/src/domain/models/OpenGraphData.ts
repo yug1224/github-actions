@@ -42,11 +42,7 @@ export class OpenGraphData {
    * プライベートコンストラクタ
    * 外部からは create() を使用する
    */
-  private constructor(
-    title?: string,
-    description?: string,
-    imageUrl?: Url,
-  ) {
+  private constructor(title?: string, description?: string, imageUrl?: Url) {
     this.title = title;
     this.description = description;
     this.imageUrl = imageUrl;
@@ -58,11 +54,7 @@ export class OpenGraphData {
    * @param data - OGPデータ
    * @returns OpenGraphDataインスタンス
    */
-  static create(data: {
-    title?: string;
-    description?: string;
-    imageUrl?: string;
-  }): OpenGraphData {
+  static create(data: { title?: string; description?: string; imageUrl?: string }): OpenGraphData {
     const imageUrl = data.imageUrl ? Url.create(data.imageUrl) : undefined;
     return new OpenGraphData(data.title, data.description, imageUrl);
   }

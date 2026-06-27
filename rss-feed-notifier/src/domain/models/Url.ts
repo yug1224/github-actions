@@ -86,10 +86,7 @@ export class Url {
       const absolute = new URL(relativeUrl, baseUrl);
       return new Url(absolute.href);
     } catch (error) {
-      throw new InvalidUrlError(
-        `${relativeUrl} (base: ${baseUrl})`,
-        error as Error,
-      );
+      throw new InvalidUrlError(`${relativeUrl} (base: ${baseUrl})`, error as Error);
     }
   }
 

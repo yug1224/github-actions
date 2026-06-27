@@ -61,12 +61,7 @@ export class AppError extends Error {
  */
 export class FileNotFoundError extends AppError {
   constructor(filePath: string, cause?: Error) {
-    super(
-      `ファイルが見つかりません: ${filePath}`,
-      'FILE_NOT_FOUND',
-      { filePath },
-      cause,
-    );
+    super(`ファイルが見つかりません: ${filePath}`, 'FILE_NOT_FOUND', { filePath }, cause);
     this.name = 'FileNotFoundError';
   }
 }
@@ -76,12 +71,7 @@ export class FileNotFoundError extends AppError {
  */
 export class NetworkError extends AppError {
   constructor(url: string, statusCode?: number, cause?: Error) {
-    super(
-      `ネットワークリクエストに失敗しました: ${url}`,
-      'NETWORK_ERROR',
-      { url, statusCode },
-      cause,
-    );
+    super(`ネットワークリクエストに失敗しました: ${url}`, 'NETWORK_ERROR', { url, statusCode }, cause);
     this.name = 'NetworkError';
   }
 }
@@ -91,12 +81,7 @@ export class NetworkError extends AppError {
  */
 export class ImageProcessError extends AppError {
   constructor(message: string, context?: Record<string, unknown>, cause?: Error) {
-    super(
-      message,
-      'IMAGE_PROCESS_ERROR',
-      context,
-      cause,
-    );
+    super(message, 'IMAGE_PROCESS_ERROR', context, cause);
     this.name = 'ImageProcessError';
   }
 }
@@ -106,12 +91,7 @@ export class ImageProcessError extends AppError {
  */
 export class UploadError extends AppError {
   constructor(message: string, context?: Record<string, unknown>, cause?: Error) {
-    super(
-      message,
-      'UPLOAD_ERROR',
-      context,
-      cause,
-    );
+    super(message, 'UPLOAD_ERROR', context, cause);
     this.name = 'UploadError';
   }
 }
@@ -121,12 +101,7 @@ export class UploadError extends AppError {
  */
 export class AuthError extends AppError {
   constructor(service: string, cause?: Error) {
-    super(
-      `${service}の認証に失敗しました`,
-      'AUTH_ERROR',
-      { service },
-      cause,
-    );
+    super(`${service}の認証に失敗しました`, 'AUTH_ERROR', { service }, cause);
     this.name = 'AuthError';
   }
 }

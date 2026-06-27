@@ -2,7 +2,7 @@ name: RSS Feed Notifier
 
 on:
   schedule:
-    - cron: "*/15 * * * *"
+    - cron: '*/15 * * * *'
   workflow_dispatch:
 
 jobs:
@@ -14,61 +14,60 @@ jobs:
     timeout-minutes: 15
 
     steps:
-      # リポジトリのチェックアウト
       - name: Checkout
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
-      # Denoのセットアップ
-      - name: Setup Deno
-        uses: denoland/setup-deno@909cc5acb0fdd60627fb858598759246509fa755 # v2.0.2
+      - name: Install pnpm
+        uses: pnpm/action-setup@008330803749db0355799c700092d9a85fd074e9 # v6.0.9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
         with:
-          deno-version: v2.x
+          node-version: '24'
+          cache: 'pnpm'
 
-      # 必要なディレクトリの作成
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+        working-directory: ${{ github.workspace }}
+
       - name: Create directories
         run: mkdir -p data temp
 
-      # タイムスタンプキャッシュの復元
       - name: Restore timestamp cache
         id: restore_timestamp
-        uses: actions/cache/restore@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: rss-feed-notifier/data/.timestamp
           key: rss-feed-notifier-timestamp-${{ github.run_id }}
           restore-keys: |
             rss-feed-notifier-timestamp-
 
-      # アイテムリストキャッシュの復元
       - name: Restore item list cache
         id: restore_itemlist
-        uses: actions/cache/restore@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: rss-feed-notifier/data/.itemList.json
           key: rss-feed-notifier-itemlist-${{ github.run_id }}
           restore-keys: |
             rss-feed-notifier-itemlist-
 
-      # dotenvxのインストール
       - name: Install dotenvx
         run: curl -sfS https://dotenvx.sh/install.sh | sh
 
-      # Denoの実行
       - name: Run notifier
-        run: dotenvx run -- deno run -A main.ts
+        run: dotenvx run -- pnpm start
         env:
           DOTENV_PRIVATE_KEY: ${{ secrets.DOTENV_PRIVATE_KEY_RSS_FEED_NOTIFIER }}
 
-      # タイムスタンプキャッシュの保存
       - name: Save timestamp cache
-        uses: actions/cache/save@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         if: always()
         with:
           path: rss-feed-notifier/data/.timestamp
           key: rss-feed-notifier-timestamp-${{ github.run_id }}
 
-      # アイテムリストキャッシュの保存
       - name: Save item list cache
-        uses: actions/cache/save@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         if: always()
         with:
           path: rss-feed-notifier/data/.itemList.json
