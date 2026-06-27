@@ -5,8 +5,8 @@
  */
 
 import { abortable } from '@std/async';
+import * as AtprotoAPI from '@atproto/api';
 import { AtpAgent, type BlobRef, RichText } from '@atproto/api';
-import type AtprotoAPI from '@atproto/api';
 import { logger } from '../../utils/logger.ts';
 import { retry } from '../../utils/retry.ts';
 import { BLUESKY_LANGUAGE, RETRY_CONFIG } from '../../config/constants.ts';
