@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "start": "vite-node main.ts",
+    "start": "node ../scripts/run-module-runner.mjs main.ts",
     "check": "pnpm --dir .. run check",
     "check:fix": "pnpm --dir .. run check:fix",
     "typecheck": "pnpm --dir .. exec tsc --noEmit -p link-insight-notifier/tsconfig.json"

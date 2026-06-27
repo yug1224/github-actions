@@ -50,6 +50,8 @@ pnpm run typecheck  # tsc --noEmit
 
 ## 各 Notifier の実行
 
+各 notifier は Vite の [Module Runner](https://vite.dev/guide/api-environment-runtimes)（`runnerImport`）経由で TypeScript を実行します。共通ランナーは [`scripts/run-module-runner.mjs`](scripts/run-module-runner.mjs) です。
+
 ```bash
 cd github-star-notifier
 dotenvx run -- pnpm start
