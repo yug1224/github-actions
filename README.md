@@ -35,6 +35,19 @@ pnpm run test:rss-feed-notifier
 pnpm run typecheck  # tsc --noEmit
 ```
 
+## 依存関係の自動更新（Dependabot）
+
+[`.github/dependabot.yml`](.github/dependabot.yml) により、以下を Dependabot が監視します。
+
+| 対象 | ecosystem |
+| ---- | --------- |
+| GitHub Actions（`.github/workflows/`） | `github-actions` |
+| npm パッケージ（pnpm モノレポ） | `npm` |
+
+- **スケジュール**: 毎週
+- **cooldown**: 7 日（version updates のみ。セキュリティ更新 PR は猶予なし）
+- **手動管理**: Node.js / pnpm（[`.mise.toml`](.mise.toml)、`packageManager`）、dotenvx（ワークフロー内 curl インストール）
+
 ## 各 Notifier の実行
 
 ```bash

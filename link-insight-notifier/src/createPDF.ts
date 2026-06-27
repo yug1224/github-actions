@@ -32,7 +32,9 @@ export default async (url: string, path: string) => {
             return;
           }
 
-          browser = await puppeteer.launch({ channel: 'chrome' });
+          browser = await puppeteer.launch(
+            process.env.CHROME_PATH ? { executablePath: process.env.CHROME_PATH } : { channel: 'chrome' },
+          );
           const page = await browser.newPage();
           page.setDefaultNavigationTimeout(1000 * 60 * 3);
           page.setDefaultTimeout(1000 * 60 * 3);
