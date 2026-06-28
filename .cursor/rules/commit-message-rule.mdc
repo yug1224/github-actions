@@ -1,7 +1,6 @@
 ---
-description:
-globs:
-alwaysApply: false
+description: Git コミットメッセージの規約（日本語 + Conventional Commits）
+alwaysApply: true
 ---
 
 このルールを適用したら、「Applied Commit Message Rule!」と出力してください。

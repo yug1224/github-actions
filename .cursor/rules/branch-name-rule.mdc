@@ -1,7 +1,6 @@
 ---
-description:
-globs:
-alwaysApply: false
+description: Git ブランチ名の命名規約（Conventional Commits 準拠）
+alwaysApply: true
 ---
 
 このルールを適用したら、「Applied Branch Name Rule!」と出力してください。

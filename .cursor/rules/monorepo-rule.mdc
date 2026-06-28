@@ -1,0 +1,36 @@
+---
+description: モノレポ共通の開発ワークフロー（pnpm workspace, Vite+, lefthook）
+globs:
+  - "package.json"
+  - "pnpm-workspace.yaml"
+  - "lefthook.yml"
+  - "vite.config.ts"
+  - "scripts/**"
+alwaysApply: false
+---
+
+このルールを適用したら、「Applied Monorepo Rule!」と出力してください。
+
+# モノレポ構成
+
+pnpm workspace で 3 つの notifier パッケージを管理する。
+
+| パッケージ | Vitest project 名 |
+|-----------|-------------------|
+| github-star-notifier | `github-star-notifier` |
+| rss-feed-notifier | `rss-feed-notifier` |
+| link-insight-notifier | （ルート typecheck のみ。Vitest project 未登録） |
+
+# 変更時のテスト
+
+- ルート変更・複数パッケージ変更: `pnpm run check && pnpm run test`
+- github-star-notifier のみ: `pnpm run test:github-star-notifier`
+- rss-feed-notifier のみ: `pnpm run test:rss-feed-notifier`
+- link-insight-notifier のみ: `pnpm run typecheck`（テスト未整備）
+
+# Git hooks（lefthook）
+
+- **pre-commit**: ステージされたファイルに対し、対象パッケージごとに fmt / lint / tsc
+- **pre-push**: 変更パッケージの Vitest + 全体 typecheck
+
+詳細なコマンド一覧はルート `AGENTS.md` を参照すること。
