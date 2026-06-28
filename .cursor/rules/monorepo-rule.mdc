@@ -30,7 +30,7 @@ pnpm workspace で 3 つの notifier パッケージを管理する。
 
 # Git hooks（lefthook）
 
-- **pre-commit**: ステージされたファイルに対し、対象パッケージごとに fmt / lint / tsc
-- **pre-push**: 変更パッケージの Vitest + 全体 typecheck
+- **pre-commit**: ステージされたファイルの glob に一致するものに対し fmt / lint / tsc（パッケージ別 + ドキュメント + ルート設定）
+- **pre-push**: CI と同一の `pnpm run check` → `pnpm run test` → `pnpm run typecheck` を順に実行
 
 詳細なコマンド一覧はルート `AGENTS.md` を参照すること。

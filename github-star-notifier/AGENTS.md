@@ -16,14 +16,14 @@ dotenvx run -- pnpm start
 
 ## 環境変数
 
-| 変数 | 必須 | 説明 |
-|------|------|------|
-| `BLUESKY_IDENTIFIER` | はい | Bluesky ハンドル |
-| `BLUESKY_PASSWORD` | はい | Bluesky アプリパスワード |
-| `GOOGLE_AI_API_KEY` | はい | Google Gemini API キー（記事要約生成） |
-| `GEMINI_MODEL` | いいえ | デフォルト `gemini-2.0-flash-lite` |
-| `RSS_URL` | はい | GitHub スター RSS の URL |
-| `WEBHOOK_URL` | いいえ | IFTTT 等の Webhook URL |
+| 変数                 | 必須   | 説明                                   |
+| -------------------- | ------ | -------------------------------------- |
+| `BLUESKY_IDENTIFIER` | はい   | Bluesky ハンドル                       |
+| `BLUESKY_PASSWORD`   | はい   | Bluesky アプリパスワード               |
+| `GOOGLE_AI_API_KEY`  | はい   | Google Gemini API キー（記事要約生成） |
+| `GEMINI_MODEL`       | いいえ | デフォルト `gemini-2.0-flash-lite`     |
+| `RSS_URL`            | はい   | GitHub スター RSS の URL               |
+| `WEBHOOK_URL`        | いいえ | IFTTT 等の Webhook URL                 |
 
 ## Testing instructions
 

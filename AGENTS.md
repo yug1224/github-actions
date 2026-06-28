@@ -11,30 +11,30 @@
 
 ## Subprojects
 
-| ディレクトリ | 説明 |
-|-------------|------|
-| `github-star-notifier/` | GitHub スター RSS を Bluesky / Webhook に通知 |
-| `rss-feed-notifier/` | RSS フィード新着を Bluesky に通知 |
-| `link-insight-notifier/` | 任意 URL を要約して Bluesky に投稿 |
+| ディレクトリ             | 説明                                          |
+| ------------------------ | --------------------------------------------- |
+| `github-star-notifier/`  | GitHub スター RSS を Bluesky / Webhook に通知 |
+| `rss-feed-notifier/`     | RSS フィード新着を Bluesky に通知             |
+| `link-insight-notifier/` | 任意 URL を要約して Bluesky に投稿            |
 
 各サブプロジェクトの起動方法・環境変数は、それぞれの `AGENTS.md` を参照。
 
 ## Commands
 
-| コマンド | 用途 |
-|---------|------|
-| `pnpm run check` | Oxfmt + Oxlint + tsc 型チェック（全体） |
-| `pnpm run check:fix` | フォーマット自動修正 + Lint + 型チェック |
-| `pnpm run test` | Vitest（全プロジェクト） |
-| `pnpm run test:github-star-notifier` | github-star-notifier のみテスト |
-| `pnpm run test:rss-feed-notifier` | rss-feed-notifier のみテスト |
-| `pnpm run typecheck` | 全パッケージの tsc --noEmit |
+| コマンド                             | 用途                                     |
+| ------------------------------------ | ---------------------------------------- |
+| `pnpm run check`                     | Oxfmt + Oxlint + tsc 型チェック（全体）  |
+| `pnpm run check:fix`                 | フォーマット自動修正 + Lint + 型チェック |
+| `pnpm run test`                      | Vitest（全プロジェクト）                 |
+| `pnpm run test:github-star-notifier` | github-star-notifier のみテスト          |
+| `pnpm run test:rss-feed-notifier`    | rss-feed-notifier のみテスト             |
+| `pnpm run typecheck`                 | 全パッケージの tsc --noEmit              |
 
 ## Testing instructions
 
 - CI 定義: `.github/workflows/`
-- コミット前: lefthook がステージファイルに対し fmt / lint / tsc を実行
-- プッシュ前: 変更パッケージの Vitest + 全体 typecheck
+- コミット前: lefthook pre-commit がステージファイルに対し fmt / lint / tsc を実行（glob に一致するファイルのみ）
+- プッシュ前: lefthook pre-push が CI と同じ `pnpm run check` → `pnpm run test` → `pnpm run typecheck` を順に実行
 - マージ前に `pnpm run check && pnpm run test` を通すこと
 - 単体テストの絞り込み: `pnpm exec vitest run --project <project-name> -t "<test name>"`
 

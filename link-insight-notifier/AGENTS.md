@@ -19,15 +19,15 @@ dotenvx run -- pnpm start
 
 ## 環境変数
 
-| 変数 | 必須 | 説明 |
-|------|------|------|
-| `LINK` | はい | 要約・投稿対象の URL |
-| `BLUESKY_IDENTIFIER` | はい | Bluesky ハンドル |
-| `BLUESKY_PASSWORD` | はい | Bluesky アプリパスワード |
-| `GOOGLE_AI_API_KEY` | はい | Google Gemini API キー（要約生成） |
-| `GEMINI_MODEL` | いいえ | デフォルト `gemini-2.0-flash-lite` |
-| `WEBHOOK_URL` | いいえ | X 投稿用 Webhook URL |
-| `CHROME_PATH` | いいえ | PDF 生成用 Chrome 実行パス |
+| 変数                 | 必須   | 説明                               |
+| -------------------- | ------ | ---------------------------------- |
+| `LINK`               | はい   | 要約・投稿対象の URL               |
+| `BLUESKY_IDENTIFIER` | はい   | Bluesky ハンドル                   |
+| `BLUESKY_PASSWORD`   | はい   | Bluesky アプリパスワード           |
+| `GOOGLE_AI_API_KEY`  | はい   | Google Gemini API キー（要約生成） |
+| `GEMINI_MODEL`       | いいえ | デフォルト `gemini-2.0-flash-lite` |
+| `WEBHOOK_URL`        | いいえ | X 投稿用 Webhook URL               |
+| `CHROME_PATH`        | いいえ | PDF 生成用 Chrome 実行パス         |
 
 ## URL 種別による処理分岐
 

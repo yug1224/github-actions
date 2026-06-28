@@ -16,11 +16,11 @@ dotenvx run -- pnpm start
 
 ## 環境変数
 
-| 変数 | 必須 | 説明 |
-|------|------|------|
-| `RSS_URL` | はい | 監視対象の RSS フィード URL |
-| `BLUESKY_IDENTIFIER` | はい | Bluesky ハンドル |
-| `BLUESKY_PASSWORD` | はい | Bluesky アプリパスワード |
+| 変数                 | 必須 | 説明                        |
+| -------------------- | ---- | --------------------------- |
+| `RSS_URL`            | はい | 監視対象の RSS フィード URL |
+| `BLUESKY_IDENTIFIER` | はい | Bluesky ハンドル            |
+| `BLUESKY_PASSWORD`   | はい | Bluesky アプリパスワード    |
 
 ## Testing instructions
 
