@@ -1,9 +1,20 @@
 # Lefthook Configuration
 # Git hooks の自動実行設定
+# pre-push は CI（.github/workflows/ci.yml）と同一の 3 コマンドを実行
 
 pre-commit:
   parallel: true
   commands:
+    format-docs:
+      glob: '{AGENTS.md,**/*.md,.cursor/**/*.mdc}'
+      run: pnpm exec vp fmt {staged_files}
+      stage_fixed: true
+
+    format-root:
+      glob: '{package.json,pnpm-workspace.yaml,lefthook.yml,vite.config.ts,tsconfig*.json,.github/workflows/*.{yml,yaml}}'
+      run: pnpm exec vp fmt {staged_files}
+      stage_fixed: true
+
     format-github-star:
       glob: 'github-star-notifier/**/*.{ts,tsx,js,jsx,json,jsonc}'
       run: pnpm exec vp fmt {staged_files}
@@ -46,14 +57,11 @@ pre-commit:
 pre-push:
   parallel: false
   commands:
-    test-github-star:
-      glob: 'github-star-notifier/**/*.{ts,tsx}'
-      run: pnpm exec vitest run --project github-star-notifier
+    check:
+      run: pnpm run check
 
-    test-rss-feed:
-      glob: 'rss-feed-notifier/**/*.{ts,tsx}'
-      run: pnpm exec vitest run --project rss-feed-notifier
+    test:
+      run: pnpm run test
 
-    typecheck-all:
-      glob: '**/*.{ts,tsx}'
+    typecheck:
       run: pnpm run typecheck

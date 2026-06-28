@@ -1,0 +1,63 @@
+---
+description: Link Insight Notifier のドメインルール
+globs:
+  - "link-insight-notifier/**"
+alwaysApply: false
+---
+
+このルールを適用したら、「Applied Link Insight Notifier Domain Rules!」と出力してください。
+
+# プロジェクト概要
+
+Link Insight Notifier は、任意 URL のコンテンツを要約し、Bluesky と Webhook に投稿するアプリケーションです。
+
+**重要**: 本プロジェクトは DDD レイヤー未採用のフラット構成です。他 notifier への構造合わせ（レイヤー分割）は本タスクのスコープ外とし、現状の `main.ts` オーケストレーション + `src/*.ts` モジュール構成を維持してください。
+
+# ユビキタス言語（プロジェクト固有）
+
+## コアドメイン用語
+
+- **Link**: 要約・投稿対象の URL（環境変数 `LINK`）
+- **Summary**: Google Gemini API で生成した要約テキスト（最大 300 文字想定）
+- **OpenGraphData (OGP)**: ページのタイトル・説明・画像メタデータ
+- **BlueskyPost**: Bluesky への投稿（テキスト + OGP カード + 画像）
+- **WebhookNotification**: X 投稿用 Webhook へのテキスト送信
+
+## 処理フロー
+
+1. `LINK` を取得し、空なら正常終了
+2. OGP 取得（PDF はファイル名をタイトルに）
+3. URL 種別に応じて Summary 生成
+4. Summary が空なら正常終了
+5. Bluesky 投稿 + Webhook 送信
+
+# ファイル責務マップ
+
+| ファイル | 責務 |
+|---------|------|
+| `main.ts` | エントリポイント。フロー全体のオーケストレーション |
+| `src/getOgp.ts` | OGP メタデータ取得 |
+| `src/extractReadableContent.ts` | 通常 Web ページの本文抽出 |
+| `src/createSummary.ts` | 本文テキストから Gemini で要約生成 |
+| `src/createYouTubeSummary.ts` | YouTube URL から要約生成 |
+| `src/createPDF.ts` | Speaker Deck 等から PDF 生成（Puppeteer） |
+| `src/createPDFSummary.ts` | PDF から Gemini で要約生成 |
+| `src/createBlueskyProps.ts` | Bluesky 投稿用テキスト・カード構築 |
+| `src/resizeImage.ts` | OGP 画像のリサイズ |
+| `src/postBluesky.ts` | Bluesky API 投稿 |
+| `src/postWebhook.ts` | Webhook 送信 |
+| `src/utils/abortable.ts` | タイムアウト付き fetch ユーティリティ |
+
+# コーディング規約
+
+- 日本語でコメントとドキュメントを記述
+- 環境変数は `process.env` から直接読み取り（`config/env.ts` は未整備）
+- API キー・トークンをログに出力しない
+- プライベート IP への画像取得はスキップする（`main.ts` の既存ロジックを維持）
+
+# 外部サービス
+
+- Bluesky: `@atproto/api`
+- 要約: Google Gemini API（`@google/generative-ai`）
+- PDF 生成: Puppeteer（`CHROME_PATH` または channel `chrome`）
+- 本文抽出: `@mozilla/readability` + `jsdom`

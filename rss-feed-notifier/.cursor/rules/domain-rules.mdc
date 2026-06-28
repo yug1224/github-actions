@@ -1,5 +1,8 @@
 ---
-rss-feed-notifier/domain-rules: RSS Feed Notifier のドメインルール
+description: RSS Feed Notifier のドメインルール
+globs:
+  - "rss-feed-notifier/**"
+alwaysApply: false
 ---
 
 このルールを適用したら、「Applied RSS Feed Notifier Domain Rules!」と出力してください。
