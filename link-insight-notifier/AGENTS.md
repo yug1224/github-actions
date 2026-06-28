@@ -38,8 +38,8 @@ dotenvx run -- pnpm start
 ## Testing instructions
 
 ```bash
-pnpm run typecheck   # このプロジェクトの tsc
+pnpm run type:check   # 型チェック（モノレポ全体、ルート経由）
 ```
 
 - Vitest プロジェクト未登録。テスト追加時はルート `vite.config.ts` への登録を検討する
-- マージ前はルートで `pnpm run check && pnpm run typecheck` を通す
+- マージ前はルートで `pnpm run fmt:check && pnpm run lint:check && pnpm run type:check` を通す

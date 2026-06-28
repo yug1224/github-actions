@@ -5,10 +5,12 @@
   "type": "module",
   "scripts": {
     "start": "node ../scripts/run-module-runner.mjs main.ts",
-    "check": "pnpm --dir .. run check",
-    "check:fix": "pnpm --dir .. run check:fix",
-    "test": "pnpm --dir .. exec vp test --project rss-feed-notifier",
-    "typecheck": "pnpm --dir .. exec tsc --noEmit -p rss-feed-notifier/tsconfig.json"
+    "lint:check": "pnpm --dir .. run lint:check",
+    "lint:fix": "pnpm --dir .. run lint:fix",
+    "fmt:check": "pnpm --dir .. run fmt:check",
+    "fmt:fix": "pnpm --dir .. run fmt:fix",
+    "type:check": "pnpm --dir .. run type:check",
+    "test": "pnpm --dir .. exec vp test --project rss-feed-notifier"
   },
   "dependencies": {
     "@atproto/api": "^0.20.22",

@@ -3,12 +3,14 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "check": "vp check",
-    "check:fix": "vp check --fix",
+    "lint:check": "vp lint",
+    "lint:fix": "vp lint --fix",
+    "fmt:check": "vp fmt --check",
+    "fmt:fix": "vp fmt",
+    "type:check": "vp check --no-fmt --no-lint",
     "test": "vp test",
     "test:github-star-notifier": "vp test --project github-star-notifier",
-    "test:rss-feed-notifier": "vp test --project rss-feed-notifier",
-    "typecheck": "tsc --noEmit -p github-star-notifier/tsconfig.json && tsc --noEmit -p rss-feed-notifier/tsconfig.json && tsc --noEmit -p link-insight-notifier/tsconfig.json"
+    "test:rss-feed-notifier": "vp test --project rss-feed-notifier"
   },
   "devDependencies": {
     "@types/jsdom": "^28.0.3",

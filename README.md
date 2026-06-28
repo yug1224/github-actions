@@ -26,29 +26,30 @@ pnpm install
 ## 開発コマンド（ルート）
 
 ```bash
-pnpm run check      # Oxfmt + Oxlint + 型チェック（CI と同じフルチェック）
-pnpm run check:fix  # フォーマット自動修正 + Lint + 型チェック
-pnpm run test       # Vitest（全プロジェクト）
+pnpm run lint:check   # Oxlint
+pnpm run lint:fix     # Oxlint 自動修正
+pnpm run fmt:check    # Oxfmt チェック
+pnpm run fmt:fix      # Oxfmt 自動修正
+pnpm run type:check   # 型チェック
+pnpm run test         # Vitest（全プロジェクト）
 pnpm run test:github-star-notifier
 pnpm run test:rss-feed-notifier
-pnpm run typecheck  # tsc --noEmit（手動実行用）
 ```
 
 ## Git hooks（lefthook）
 
-| フック     | コマンド                                                      | 役割                                               |
-| ---------- | ------------------------------------------------------------- | -------------------------------------------------- |
-| pre-commit | `pnpm exec vp lint --fix` / `pnpm exec vp fmt`                | ステージ済みファイルの lint 自動修正とフォーマット |
-| pre-push   | `pnpm exec vp check --no-fmt --no-lint` → `pnpm exec vp test` | 型チェックとテスト                                 |
+| フック     | コマンド                                      | 役割                                               |
+| ---------- | --------------------------------------------- | -------------------------------------------------- |
+| pre-commit | `pnpm run lint:fix` / `pnpm run fmt:fix`      | ステージ済みファイルの lint 自動修正とフォーマット |
 
 ## CI / GitHub Actions
 
 CI と notifier デプロイ workflow は `pnpm/action-setup` + `actions/setup-node` で Node / pnpm をセットアップする（`setup-vp` は使用しない）。
 
-| workflow      | 実行内容                                                              |
-| ------------- | --------------------------------------------------------------------- |
-| CI            | `pnpm install --frozen-lockfile` → `pnpm run check` → `pnpm run test` |
-| Notifier 各種 | `pnpm install --frozen-lockfile` → `dotenvx run -- pnpm start`        |
+| workflow      | 実行内容                                                                                      |
+| ------------- | --------------------------------------------------------------------------------------------- |
+| CI            | `pnpm install --frozen-lockfile` → `fmt:check` / `lint:check` / `type:check` / `test`（並列） |
+| Notifier 各種 | `pnpm install --frozen-lockfile` → `dotenvx run -- pnpm start`                                |
 
 ## 依存関係の自動更新（Dependabot）
 

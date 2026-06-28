@@ -66,9 +66,9 @@ pnpm run test
 ### その他のコマンド
 
 ```bash
-pnpm run check       # モノレポ全体（フォーマット + Lint + 型チェック）
-pnpm run check:fix   # 同上（フォーマット自動修正）
-pnpm run typecheck   # このプロジェクトのみ
+pnpm run lint:check  # Lint（モノレポ全体、ルート経由）
+pnpm run fmt:check   # フォーマットチェック（モノレポ全体、ルート経由）
+pnpm run type:check  # 型チェック（モノレポ全体、ルート経由）
 ```
 
 ### 環境変数
