@@ -5,7 +5,7 @@
  */
 
 import { readFile, writeFile } from 'node:fs/promises';
-import { IFeedRepository } from '../../domain/repositories/IFeedRepository.ts';
+import type { IFeedRepository } from '../../domain/repositories/IFeedRepository.ts';
 import { FeedItem } from '../../domain/models/FeedItem.ts';
 import { Timestamp } from '../../domain/models/Timestamp.ts';
 import { Url } from '../../domain/models/Url.ts';

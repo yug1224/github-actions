@@ -4,7 +4,7 @@
  * Bluesky投稿を管理
  */
 
-import { BlueskyPostData, INotificationRepository } from '../../domain/repositories/INotificationRepository.ts';
+import type { BlueskyPostData, INotificationRepository } from '../../domain/repositories/INotificationRepository.ts';
 import { BlueskyClient } from '../external/BlueskyClient.ts';
 import { logger } from '../../utils/logger.ts';
 

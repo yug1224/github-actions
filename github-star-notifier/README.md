@@ -14,7 +14,7 @@ GitHubでスターしたリポジトリをRSSフィードから取得し、Blues
 
 ## 必要な環境
 
-- Node.js 24（[mise](https://mise.jdx.dev/) 推奨）
+- Node.js 26（[mise](https://mise.jdx.dev/) 推奨）
 - pnpm 11
 - モノレポルートで `pnpm install` 済みであること
 
@@ -163,7 +163,7 @@ echo "0" > data/.timestamp
 
 詳細は [`.github/workflows/github-star-notifier.yml`](../.github/workflows/github-star-notifier.yml) を参照してください。
 
-- Node.js 24 + pnpm 11
+- Node.js 26 + pnpm 11
 - `dotenvx run -- pnpm start` で実行（Vite Module Runner 経由）
 - `data/.timestamp` を Actions cache で永続化
 

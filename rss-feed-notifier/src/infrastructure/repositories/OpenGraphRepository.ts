@@ -4,7 +4,7 @@
  * OGPデータの取得を管理
  */
 
-import { IOpenGraphRepository } from '../../domain/repositories/IOpenGraphRepository.ts';
+import type { IOpenGraphRepository } from '../../domain/repositories/IOpenGraphRepository.ts';
 import { OpenGraphData } from '../../domain/models/OpenGraphData.ts';
 import { Url } from '../../domain/models/Url.ts';
 import { OgpFetcher } from '../external/OgpFetcher.ts';

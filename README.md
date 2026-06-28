@@ -12,7 +12,7 @@
 
 ## 必要な環境
 
-- [mise](https://mise.jdx.dev/)（Node.js 24 / pnpm 11.9.0）
+- [mise](https://mise.jdx.dev/)（Node.js 26 / pnpm 11.9.0）
 - [Vite+ `vp`](https://viteplus.dev/)（任意。`pnpm exec vp` でも可）
 
 ## セットアップ

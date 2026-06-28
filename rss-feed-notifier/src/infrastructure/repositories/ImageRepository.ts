@@ -4,7 +4,7 @@
  * 画像の取得とリサイズを管理
  */
 
-import { IImageRepository, ImageData } from '../../domain/repositories/IImageRepository.ts';
+import type { IImageRepository, ImageData } from '../../domain/repositories/IImageRepository.ts';
 import { Url } from '../../domain/models/Url.ts';
 import { ImageProcessor } from '../external/ImageProcessor.ts';
 import { logger } from '../../utils/logger.ts';

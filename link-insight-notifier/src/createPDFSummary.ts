@@ -1,4 +1,4 @@
-import { FileMetadataResponse, GoogleAIFileManager } from '@google/generative-ai/server';
+import { GoogleAIFileManager, type FileMetadataResponse } from '@google/generative-ai/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
 const systemInstruction = `
