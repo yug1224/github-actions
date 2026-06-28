@@ -23,16 +23,16 @@
 
 ## Commands
 
-| コマンド                             | 用途                           |
-| ------------------------------------ | ------------------------------ |
-| `pnpm run lint:check`                | Oxlint（全体）                 |
-| `pnpm run lint:fix`                  | Oxlint 自動修正（全体）        |
-| `pnpm run fmt:check`                 | Oxfmt チェック（全体）         |
-| `pnpm run fmt:fix`                   | Oxfmt 自動修正（全体）         |
-| `pnpm run type:check`                | 型チェック（全体）             |
-| `pnpm run test`                      | Vitest（全プロジェクト）       |
+| コマンド                             | 用途                            |
+| ------------------------------------ | ------------------------------- |
+| `pnpm run lint:check`                | Oxlint（全体）                  |
+| `pnpm run lint:fix`                  | Oxlint 自動修正（全体）         |
+| `pnpm run fmt:check`                 | Oxfmt チェック（全体）          |
+| `pnpm run fmt:fix`                   | Oxfmt 自動修正（全体）          |
+| `pnpm run type:check`                | 型チェック（全体）              |
+| `pnpm run test`                      | Vitest（全プロジェクト）        |
 | `pnpm run test:github-star-notifier` | github-star-notifier のみテスト |
-| `pnpm run test:rss-feed-notifier`    | rss-feed-notifier のみテスト   |
+| `pnpm run test:rss-feed-notifier`    | rss-feed-notifier のみテスト    |
 
 ## Testing instructions
 
