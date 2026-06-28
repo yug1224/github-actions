@@ -20,20 +20,35 @@
 ```bash
 mise trust
 mise install
-vp env off   # mise の Node/pnpm を優先（初回のみ）
 pnpm install
 ```
 
 ## 開発コマンド（ルート）
 
 ```bash
-pnpm run check      # Oxfmt + Oxlint + tsc 型チェック
+pnpm run check      # Oxfmt + Oxlint + 型チェック（CI と同じフルチェック）
 pnpm run check:fix  # フォーマット自動修正 + Lint + 型チェック
 pnpm run test       # Vitest（全プロジェクト）
 pnpm run test:github-star-notifier
 pnpm run test:rss-feed-notifier
-pnpm run typecheck  # tsc --noEmit
+pnpm run typecheck  # tsc --noEmit（手動実行用）
 ```
+
+## Git hooks（lefthook）
+
+| フック     | コマンド                                                      | 役割                                               |
+| ---------- | ------------------------------------------------------------- | -------------------------------------------------- |
+| pre-commit | `pnpm exec vp lint --fix` / `pnpm exec vp fmt`                | ステージ済みファイルの lint 自動修正とフォーマット |
+| pre-push   | `pnpm exec vp check --no-fmt --no-lint` → `pnpm exec vp test` | 型チェックとテスト                                 |
+
+## CI / GitHub Actions
+
+CI と notifier デプロイ workflow は `pnpm/action-setup` + `actions/setup-node` で Node / pnpm をセットアップする（`setup-vp` は使用しない）。
+
+| workflow      | 実行内容                                                              |
+| ------------- | --------------------------------------------------------------------- |
+| CI            | `pnpm install --frozen-lockfile` → `pnpm run check` → `pnpm run test` |
+| Notifier 各種 | `pnpm install --frozen-lockfile` → `dotenvx run -- pnpm start`        |
 
 ## 依存関係の自動更新（Dependabot）
 
