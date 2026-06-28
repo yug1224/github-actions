@@ -1,24 +1,15 @@
 # Lefthook Configuration
 # pre-commit: ステージ済みファイルの lint 自動修正 + フォーマット
-# pre-push: 型チェック + テスト（CI はフル check + test）
+# 型チェック・テストは CI（fmt / lint / type / test）に委譲
 
 pre-commit:
   parallel: true
   commands:
     lint:
       glob: '**/*.{ts,tsx}'
-      run: pnpm exec vp lint --fix {staged_files}
+      run: pnpm run lint:fix -- {staged_files}
 
     fmt:
       glob: '**/*.{ts,tsx,js,jsx,json,jsonc,md,mdc,yml,yaml}'
-      run: pnpm exec vp fmt {staged_files}
+      run: pnpm run fmt:fix -- {staged_files}
       stage_fixed: true
-
-pre-push:
-  parallel: false
-  commands:
-    typecheck:
-      run: pnpm exec vp check --no-fmt --no-lint
-
-    test:
-      run: pnpm exec vp test

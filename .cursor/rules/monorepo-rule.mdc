@@ -19,18 +19,17 @@ pnpm workspace で 3 つの notifier パッケージを管理する。
 |-----------|-------------------|
 | github-star-notifier | `github-star-notifier` |
 | rss-feed-notifier | `rss-feed-notifier` |
-| link-insight-notifier | （ルート typecheck のみ。Vitest project 未登録） |
+| link-insight-notifier | （Vitest project 未登録） |
 
 # 変更時のテスト
 
-- ルート変更・複数パッケージ変更: `pnpm run check && pnpm run test`
+- ルート変更・複数パッケージ変更: `pnpm run fmt:check && pnpm run lint:check && pnpm run type:check && pnpm run test`
 - github-star-notifier のみ: `pnpm run test:github-star-notifier`
 - rss-feed-notifier のみ: `pnpm run test:rss-feed-notifier`
-- link-insight-notifier のみ: `pnpm run typecheck`（テスト未整備）
+- link-insight-notifier のみ: `pnpm run type:check`（テスト未整備）
 
 # Git hooks（lefthook）
 
-- **pre-commit**: ステージ済みファイルに `pnpm exec vp lint --fix` / `pnpm exec vp fmt` を実行
-- **pre-push**: `pnpm exec vp check --no-fmt --no-lint` → `pnpm exec vp test` を順に実行
+- **pre-commit**: ステージ済みファイルに `pnpm run lint:fix` / `pnpm run fmt:fix` を実行
 
 詳細なコマンド一覧はルート `AGENTS.md` を参照すること。

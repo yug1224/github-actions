@@ -26,9 +26,9 @@ dotenvx run -- pnpm start
 
 ```bash
 pnpm run test                  # このプロジェクトの Vitest
-pnpm run typecheck             # このプロジェクトの tsc
+pnpm run type:check            # 型チェック（モノレポ全体、ルート経由）
 pnpm run test:rss-feed-notifier  # ルートから実行する場合
 ```
 
 - ドメイン層のテストを優先して追加・更新する
-- マージ前はルートで `pnpm run check && pnpm run test` を通す
+- マージ前はルートで `pnpm run fmt:check && pnpm run lint:check && pnpm run type:check && pnpm run test` を通す

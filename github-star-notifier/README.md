@@ -58,9 +58,9 @@ dotenvx run -- pnpm start
 
 ```bash
 pnpm run test        # このプロジェクトの Vitest
-pnpm run typecheck   # このプロジェクトの tsc
-pnpm run check       # モノレポ全体（ルートから）
-pnpm run check:fix   # 同上（フォーマット自動修正）
+pnpm run type:check  # 型チェック（モノレポ全体、ルート経由）
+pnpm run lint:check  # Lint（モノレポ全体、ルート経由）
+pnpm run fmt:check   # フォーマットチェック（モノレポ全体、ルート経由）
 ```
 
 ルートから特定プロジェクトだけテストする場合:
