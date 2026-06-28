@@ -37,7 +37,7 @@ src/
 
 ### 必要な環境
 
-- Node.js 24（[mise](https://mise.jdx.dev/) 推奨）
+- Node.js 26（[mise](https://mise.jdx.dev/) 推奨）
 - pnpm 11
 - モノレポルートで `pnpm install` 済みであること
 

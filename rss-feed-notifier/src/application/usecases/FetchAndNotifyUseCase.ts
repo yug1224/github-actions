@@ -4,10 +4,10 @@
  * RSSフィードを取得して通知するユースケース
  */
 
-import { IFeedRepository } from '../../domain/repositories/IFeedRepository.ts';
-import { INotificationRepository } from '../../domain/repositories/INotificationRepository.ts';
-import { IOpenGraphRepository } from '../../domain/repositories/IOpenGraphRepository.ts';
-import { IImageRepository, type ImageData } from '../../domain/repositories/IImageRepository.ts';
+import type { IFeedRepository } from '../../domain/repositories/IFeedRepository.ts';
+import type { INotificationRepository } from '../../domain/repositories/INotificationRepository.ts';
+import type { IOpenGraphRepository } from '../../domain/repositories/IOpenGraphRepository.ts';
+import type { IImageRepository, ImageData } from '../../domain/repositories/IImageRepository.ts';
 import { BlueskyPostFormatter } from '../formatters/BlueskyPostFormatter.ts';
 import { Url } from '../../domain/models/Url.ts';
 import { FeedItem } from '../../domain/models/FeedItem.ts';
