@@ -7,7 +7,7 @@
     "start": "node ../scripts/run-module-runner.mjs main.ts",
     "check": "pnpm --dir .. run check",
     "check:fix": "pnpm --dir .. run check:fix",
-    "test": "pnpm --dir .. exec vp test run --project rss-feed-notifier",
+    "test": "pnpm --dir .. exec vp test --project rss-feed-notifier",
     "typecheck": "pnpm --dir .. exec tsc --noEmit -p rss-feed-notifier/tsconfig.json"
   },
   "dependencies": {
