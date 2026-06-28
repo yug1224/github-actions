@@ -7,7 +7,7 @@
     "start": "node ../scripts/run-module-runner.mjs main.ts",
     "check": "pnpm --dir .. run check",
     "check:fix": "pnpm --dir .. run check:fix",
-    "test": "pnpm --dir .. exec vp test run --project github-star-notifier",
+    "test": "pnpm --dir .. exec vp test --project github-star-notifier",
     "typecheck": "pnpm --dir .. exec tsc --noEmit -p github-star-notifier/tsconfig.json"
   },
   "dependencies": {
