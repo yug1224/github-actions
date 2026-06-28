@@ -1,67 +1,24 @@
 # Lefthook Configuration
-# Git hooks の自動実行設定
-# pre-push は check / test / typecheck を実行（CI は check / test のみ）
+# pre-commit: ステージ済みファイルの lint 自動修正 + フォーマット
+# pre-push: 型チェック + テスト（CI はフル check + test）
 
 pre-commit:
   parallel: true
   commands:
-    format-docs:
-      glob: '{AGENTS.md,**/*.md,.cursor/**/*.mdc}'
-      run: vp fmt {staged_files}
+    lint:
+      glob: '**/*.{ts,tsx}'
+      run: pnpm exec vp lint --fix {staged_files}
+
+    fmt:
+      glob: '**/*.{ts,tsx,js,jsx,json,jsonc,md,mdc,yml,yaml}'
+      run: pnpm exec vp fmt {staged_files}
       stage_fixed: true
-
-    format-root:
-      glob: '{.node-version,package.json,pnpm-workspace.yaml,lefthook.yml,vite.config.ts,tsconfig*.json,.github/workflows/*.{yml,yaml}}'
-      run: vp fmt {staged_files}
-      stage_fixed: true
-
-    format-github-star:
-      glob: 'github-star-notifier/**/*.{ts,tsx,js,jsx,json,jsonc}'
-      run: vp fmt {staged_files}
-      stage_fixed: true
-
-    lint-github-star:
-      glob: 'github-star-notifier/**/*.{ts,tsx}'
-      run: vp lint {staged_files}
-
-    type-check-github-star:
-      glob: 'github-star-notifier/**/*.{ts,tsx}'
-      run: pnpm exec tsc --noEmit -p github-star-notifier/tsconfig.json
-
-    format-rss-feed:
-      glob: 'rss-feed-notifier/**/*.{ts,tsx,js,jsx,json,jsonc}'
-      run: vp fmt {staged_files}
-      stage_fixed: true
-
-    lint-rss-feed:
-      glob: 'rss-feed-notifier/**/*.{ts,tsx}'
-      run: vp lint {staged_files}
-
-    type-check-rss-feed:
-      glob: 'rss-feed-notifier/**/*.{ts,tsx}'
-      run: pnpm exec tsc --noEmit -p rss-feed-notifier/tsconfig.json
-
-    format-link-insight:
-      glob: 'link-insight-notifier/**/*.{ts,tsx,js,jsx,json,jsonc}'
-      run: vp fmt {staged_files}
-      stage_fixed: true
-
-    lint-link-insight:
-      glob: 'link-insight-notifier/**/*.{ts,tsx}'
-      run: vp lint {staged_files}
-
-    type-check-link-insight:
-      glob: 'link-insight-notifier/**/*.{ts,tsx}'
-      run: pnpm exec tsc --noEmit -p link-insight-notifier/tsconfig.json
 
 pre-push:
   parallel: false
   commands:
-    check:
-      run: pnpm run check
+    typecheck:
+      run: pnpm exec vp check --no-fmt --no-lint
 
     test:
-      run: pnpm run test
-
-    typecheck:
-      run: pnpm run typecheck
+      run: pnpm exec vp test

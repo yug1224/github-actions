@@ -5,10 +5,9 @@
 ## Dev environment tips
 
 - 初回セットアップ（mise）: `mise trust && mise install && pnpm install`
-- 初回セットアップ（mise なし）: `vp install`
-- `.node-version`: Node 26 の正本（mise / Vite+ / CI が参照）
-- `packageManager`: pnpm 11.9.0 の厳密ピン（`vp install` が参照）
-- mise の pnpm / vp を優先する: `vp env off`（初回のみ。vp 0.2.x では `env` サブコマンド未対応のため mise 利用を推奨）
+- 初回セットアップ（mise なし）: `pnpm install`
+- `.node-version`: Node 26 の正本（mise / CI が参照）
+- `packageManager`: pnpm 11.9.0 の厳密ピン
 - サブプロジェクトへ移動して作業する。ルートから `pnpm --filter <package-name>` でも実行可能
 - 各パッケージ名は各ディレクトリの `package.json` の `name` フィールドを参照
 
@@ -35,9 +34,9 @@
 
 ## Testing instructions
 
-- CI 定義: `.github/workflows/`（`voidzero-dev/setup-vp` + `vp install --frozen-lockfile` / `vp check` / `vp test`）
-- コミット前: lefthook pre-commit がステージファイルに対し fmt / lint / tsc を実行（glob に一致するファイルのみ）
-- プッシュ前: lefthook pre-push が `pnpm run check` → `pnpm run test` → `pnpm run typecheck` を順に実行（CI より typecheck が追加）
+- CI 定義: `.github/workflows/`（`pnpm/action-setup` + `actions/setup-node` + `pnpm install --frozen-lockfile` / `pnpm run check` / `pnpm run test`）
+- コミット前: lefthook pre-commit がステージ済みファイルに `pnpm exec vp lint --fix` / `pnpm exec vp fmt` を実行
+- プッシュ前: lefthook pre-push が `pnpm exec vp check --no-fmt --no-lint` → `pnpm exec vp test` を順に実行
 - マージ前に `pnpm run check && pnpm run test` を通すこと
 - 単体テストの絞り込み: `vp test --project <project-name> -t "<test name>"`
 
