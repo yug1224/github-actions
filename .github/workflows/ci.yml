@@ -54,3 +54,27 @@ jobs:
 
       - name: Test
         run: pnpm run test
+
+  deps:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+
+      - uses: ./.github/actions/setup-node-pnpm
+
+      - name: Check vite-plus version consistency
+        run: pnpm run deps:check
+
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+
+      - uses: ./.github/actions/setup-node-pnpm
+
+      - name: Runner startup smoke test
+        run: pnpm run smoke
