@@ -18,3 +18,12 @@ updates:
     commit-message:
       prefix: chore
       include: scope
+    groups:
+      # vite-plus と vite-plus-core は同一バージョンで揃える必要があるため 1 PR にまとめる
+      # （ネイティブバインディングと JS 層の不整合を防ぐ）。
+      # なお overrides.vite の npm エイリアスは Dependabot が更新できないため、
+      # vite-plus 更新時は pnpm-workspace.yaml の追従が別途必要（CI の deps ジョブで検知）。
+      vite-plus:
+        patterns:
+          - vite-plus
+          - '@voidzero-dev/vite-plus-core'

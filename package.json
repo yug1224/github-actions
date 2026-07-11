@@ -8,6 +8,8 @@
     "fmt:check": "vp fmt --check",
     "fmt:fix": "vp fmt",
     "type:check": "vp check --no-fmt --no-lint",
+    "deps:check": "node scripts/check-vite-plus-consistency.mjs",
+    "smoke": "node scripts/smoke-runner.mjs",
     "test": "vp test",
     "test:github-star-notifier": "vp test --project github-star-notifier",
     "test:rss-feed-notifier": "vp test --project rss-feed-notifier"
