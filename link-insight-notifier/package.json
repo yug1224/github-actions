@@ -19,7 +19,7 @@
     "jsdom": "^29.1.1",
     "open-graph-scraper": "^6.12.0",
     "puppeteer-core": "^25.3.0",
-    "sharp": "^0.35.2",
+    "sharp": "^0.35.3",
     "unpdf": "^1.6.2"
   }
 }
