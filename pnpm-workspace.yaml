@@ -4,7 +4,7 @@ packages:
   - 'link-insight-notifier'
 
 overrides:
-  vite: npm:@voidzero-dev/vite-plus-core@0.2.1
+  vite: npm:@voidzero-dev/vite-plus-core@0.2.2
   vitest: 4.1.9
 
 allowBuilds:
