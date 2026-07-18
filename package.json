@@ -20,7 +20,7 @@
     "@voidzero-dev/vite-plus-core": "0.2.2",
     "typescript": "7.0.1-rc",
     "vite-plus": "^0.2.2",
-    "vitest": "4.1.9"
+    "vitest": "4.1.10"
   },
   "packageManager": "pnpm@11.9.0"
 }
