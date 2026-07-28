@@ -8,6 +8,11 @@ updates:
       default-days: 7
     commit-message:
       prefix: chore
+    groups:
+      # Actions の更新を1 PRにまとめる。CIが落ちたら個別対応する。
+      github-actions:
+        patterns:
+          - '*'
 
   - package-ecosystem: npm
     directory: /
@@ -27,3 +32,8 @@ updates:
         patterns:
           - vite-plus
           - '@voidzero-dev/vite-plus-core'
+      # 上記以外の npm 依存を1 PRにまとめる。CIが落ちたら個別対応する。
+      # （定義順が優先のため、vite-plus 系は上のグループに入る）
+      npm-dependencies:
+        patterns:
+          - '*'
