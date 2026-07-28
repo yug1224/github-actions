@@ -55,16 +55,15 @@ export class FetchAndNotifyUseCase {
     }
 
     const processingDeadline = Date.now() + processingTimeBudgetMs;
-    // 新しい順で取得されるため、古い順に処理して予算打ち切り時の取りこぼしを防ぐ
-    const itemsToProcess = [...itemList].reverse();
+    // RssFeedClient は古い順で返すため、そのまま処理して予算打ち切り時の取りこぼしを防ぐ
 
     // 取得した記事リストをループ処理
     let processedCount = 0;
-    for (const item of itemsToProcess) {
+    for (const item of itemList) {
       if (Date.now() >= processingDeadline) {
         logger.info('処理時間予算に達しました', {
           processedCount,
-          remainingCount: itemsToProcess.length - processedCount,
+          remainingCount: itemList.length - processedCount,
         });
         break;
       }
@@ -130,7 +129,8 @@ export class FetchAndNotifyUseCase {
       this.notificationRepo.sendWebhookNotification(webhookMessage, webhookUrl),
     ]);
 
-    await this.feedRepo.saveLastFetchedTimestamp(timestamp);
+    const prevTimestamp = await this.feedRepo.getLastFetchedTimestamp();
+    await this.feedRepo.saveLastFetchedTimestamp(Math.max(prevTimestamp, timestamp));
 
     logger.info('Successfully processed item', { link });
   }

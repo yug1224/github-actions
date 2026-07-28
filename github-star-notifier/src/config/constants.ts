@@ -59,5 +59,5 @@ export const USER_AGENT = {
 
 // 正規表現パターン
 export const PATTERNS = {
-  STARRED_FILTER: /starred/g,
+  STARRED_FILTER: /starred/,
 } as const;
