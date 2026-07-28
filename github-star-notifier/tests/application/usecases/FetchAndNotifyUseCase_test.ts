@@ -219,13 +219,13 @@ test('FetchAndNotifyUseCase - 処理時間予算に達した場合は打ち切�
 test('FetchAndNotifyUseCase - 古い順に処理される', async () => {
   class OrderedFeedRepository implements IFeedRepository {
     fetchLatestItems(_feedUrl: string): Promise<FeedEntry[]> {
-      // RssFeedClient と同様、新しい順で返す
+      // RssFeedClient は古い順で返す
       return Promise.resolve([
         {
-          id: 'newest',
-          title: { value: 'Newest' },
-          links: [{ href: 'https://example.com/article-newest' }],
-          published: new Date('2025-01-03'),
+          id: 'oldest',
+          title: { value: 'Oldest' },
+          links: [{ href: 'https://example.com/article-oldest' }],
+          published: new Date('2025-01-01'),
         },
         {
           id: 'middle',
@@ -234,10 +234,10 @@ test('FetchAndNotifyUseCase - 古い順に処理される', async () => {
           published: new Date('2025-01-02'),
         },
         {
-          id: 'oldest',
-          title: { value: 'Oldest' },
-          links: [{ href: 'https://example.com/article-oldest' }],
-          published: new Date('2025-01-01'),
+          id: 'newest',
+          title: { value: 'Newest' },
+          links: [{ href: 'https://example.com/article-newest' }],
+          published: new Date('2025-01-03'),
         },
       ] as FeedEntry[]);
     }
@@ -264,4 +264,103 @@ test('FetchAndNotifyUseCase - 古い順に処理される', async () => {
     'https://example.com/article-middle',
     'https://example.com/article-newest',
   ]);
+});
+
+test('FetchAndNotifyUseCase - 複数アイテム処理後に最大 published を保存する', async () => {
+  const oldestPublished = new Date('2025-01-01').getTime();
+  const middlePublished = new Date('2025-01-02').getTime();
+  const newestPublished = new Date('2025-01-03').getTime();
+
+  class MaxTimestampFeedRepository implements IFeedRepository {
+    public savedTimestamp?: number;
+    private lastSaved = 0;
+
+    fetchLatestItems(_feedUrl: string): Promise<FeedEntry[]> {
+      return Promise.resolve([
+        {
+          id: 'oldest',
+          title: { value: 'Oldest' },
+          links: [{ href: 'https://example.com/article-oldest' }],
+          published: new Date(oldestPublished),
+        },
+        {
+          id: 'middle',
+          title: { value: 'Middle' },
+          links: [{ href: 'https://example.com/article-middle' }],
+          published: new Date(middlePublished),
+        },
+        {
+          id: 'newest',
+          title: { value: 'Newest' },
+          links: [{ href: 'https://example.com/article-newest' }],
+          published: new Date(newestPublished),
+        },
+      ] as FeedEntry[]);
+    }
+
+    getLastFetchedTimestamp(): Promise<number> {
+      return Promise.resolve(this.lastSaved);
+    }
+
+    saveLastFetchedTimestamp(timestamp: number): Promise<void> {
+      this.lastSaved = timestamp;
+      this.savedTimestamp = timestamp;
+      return Promise.resolve();
+    }
+  }
+
+  const feedRepo = new MaxTimestampFeedRepository();
+  const contentRepo = new MockContentRepository();
+  const summaryService = new MockSummaryService();
+  const notificationRepo = new MockNotificationRepository();
+
+  const useCase = new FetchAndNotifyUseCase(feedRepo, contentRepo, summaryService, notificationRepo);
+
+  const mockAgent = createMockAgent();
+  await useCase.execute('https://example.com/feed', mockAgent, undefined);
+
+  expect(feedRepo.savedTimestamp).toBe(newestPublished);
+});
+
+test('FetchAndNotifyUseCase - 既存タイムスタンプより小さい値は保存しない', async () => {
+  const existingTimestamp = new Date('2025-06-01').getTime();
+  const itemPublished = new Date('2025-01-01').getTime();
+
+  class PrevTimestampFeedRepository implements IFeedRepository {
+    public savedTimestamp?: number;
+    private lastSaved = existingTimestamp;
+
+    fetchLatestItems(_feedUrl: string): Promise<FeedEntry[]> {
+      return Promise.resolve([
+        {
+          id: 'old-item',
+          title: { value: 'Old Item' },
+          links: [{ href: 'https://example.com/article-old' }],
+          published: new Date(itemPublished),
+        },
+      ] as FeedEntry[]);
+    }
+
+    getLastFetchedTimestamp(): Promise<number> {
+      return Promise.resolve(this.lastSaved);
+    }
+
+    saveLastFetchedTimestamp(timestamp: number): Promise<void> {
+      this.lastSaved = timestamp;
+      this.savedTimestamp = timestamp;
+      return Promise.resolve();
+    }
+  }
+
+  const feedRepo = new PrevTimestampFeedRepository();
+  const contentRepo = new MockContentRepository();
+  const summaryService = new MockSummaryService();
+  const notificationRepo = new MockNotificationRepository();
+
+  const useCase = new FetchAndNotifyUseCase(feedRepo, contentRepo, summaryService, notificationRepo);
+
+  const mockAgent = createMockAgent();
+  await useCase.execute('https://example.com/feed', mockAgent, undefined);
+
+  expect(feedRepo.savedTimestamp).toBe(existingTimestamp);
 });

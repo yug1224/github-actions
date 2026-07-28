@@ -4,6 +4,11 @@ on:
     # 毎月1日に実行
     - cron: '0 0 1 * *'
   workflow_dispatch:
+
+permissions:
+  actions: write
+  contents: write
+
 jobs:
   monthly-housekeeping:
     runs-on: ubuntu-latest
@@ -19,3 +24,55 @@ jobs:
         run: |
           git commit --allow-empty -m "chore: prevent automatic workflow stopping"
           git push
+
+  prune-actions-cache:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Prune old Actions caches
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # 各プレフィックスごとに最新5件を残し、古い世代のキャッシュを削除する
+          # gh cache list --key はプレフィックス一致。作成日時の新しい順で取得し、
+          # 6件目以降を削除。残件が5以下になるまで繰り返す（ページング相当）。
+          PREFIXES=(
+            "github-star-notifier-timestamp-"
+            "rss-feed-notifier-timestamp-"
+            "rss-feed-notifier-itemlist-"
+          )
+          KEEP=5
+          MAX_ROUNDS=50
+
+          for PREFIX in "${PREFIXES[@]}"; do
+            echo "プレフィックス: ${PREFIX}"
+            round=0
+
+            while true; do
+              round=$((round + 1))
+              if [ "${round}" -gt "${MAX_ROUNDS}" ]; then
+                echo "上限ラウンド(${MAX_ROUNDS})に達したため中断: ${PREFIX}"
+                break
+              fi
+
+              CACHE_JSON="$(gh cache list \
+                --key "${PREFIX}" \
+                --limit 100 \
+                --sort created_at \
+                --order desc \
+                --json id,key,createdAt 2>/dev/null || echo '[]')"
+
+              TOTAL="$(echo "${CACHE_JSON}" | jq 'length')"
+              echo "ラウンド ${round}: 件数=${TOTAL}"
+
+              if [ "${TOTAL}" -le "${KEEP}" ]; then
+                break
+              fi
+
+              echo "${CACHE_JSON}" | jq -r --argjson keep "${KEEP}" '.[$keep:][].id' | while read -r id; do
+                if [ -n "${id}" ]; then
+                  echo "削除: ${id}"
+                  gh cache delete "${id}" || true
+                fi
+              done
+            done
+          done

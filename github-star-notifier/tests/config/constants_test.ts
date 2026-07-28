@@ -59,3 +59,11 @@ test('PATTERNS.STARRED_FILTER - 正規表現', () => {
   expect(PATTERNS.STARRED_FILTER.test('yug1224 starred repo')).toBe(true);
   expect(PATTERNS.STARRED_FILTER.test('yug1224 forked repo')).toBe(false);
 });
+
+test('PATTERNS.STARRED_FILTER - 連続 test でも偶奇で結果が変わらない', () => {
+  const titles = ['user1 starred repo-a', 'user2 starred repo-b', 'user3 starred repo-c'];
+
+  for (const title of titles) {
+    expect(PATTERNS.STARRED_FILTER.test(title)).toBe(true);
+  }
+});
