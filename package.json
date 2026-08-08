@@ -16,7 +16,7 @@
   },
   "devDependencies": {
     "@types/jsdom": "^28.0.3",
-    "@types/node": "^26.1.0",
+    "@types/node": "^26.1.2",
     "@voidzero-dev/vite-plus-core": "0.2.2",
     "typescript": "7.0.2",
     "vite-plus": "^0.2.2",
