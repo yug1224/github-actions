@@ -15,8 +15,8 @@
     "test:rss-feed-notifier": "vp test --project rss-feed-notifier"
   },
   "devDependencies": {
-    "@types/jsdom": "^28.0.3",
-    "@types/node": "^26.1.0",
+    "@types/jsdom": "^30.0.0",
+    "@types/node": "^26.2.0",
     "@voidzero-dev/vite-plus-core": "0.2.2",
     "typescript": "7.0.2",
     "vite-plus": "^0.2.2",
