@@ -13,12 +13,12 @@
     "test": "pnpm --dir .. exec vp test --project rss-feed-notifier"
   },
   "dependencies": {
-    "@atproto/api": "^0.20.41",
-    "dotenv": "^17.4.2",
-    "jsdom": "^30.0.1",
+    "@atproto/api": "^0.28.0",
+    "dotenv": "^18.0.8",
+    "jsdom": "^30.1.3",
     "open-graph-scraper": "^6.12.0",
     "rss-parser": "^3.13.0",
-    "sharp": "^0.35.3",
-    "unpdf": "^1.8.1"
+    "sharp": "^0.35.5",
+    "unpdf": "^1.9.0"
   }
 }
